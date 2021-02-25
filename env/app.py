@@ -85,7 +85,7 @@ def index():
     
         write(estimate[0],"enhanced.wav",sr)
 
-        RESULT = "hi"
+        RESULT = ""
         socketio.emit('my_response',{'data': RESULT})
         print("--- %s seconds ---" % (time.time() - start_time))
         return ('', 204)

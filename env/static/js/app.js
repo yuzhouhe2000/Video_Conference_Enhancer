@@ -60,6 +60,7 @@ function pauseRecording(){
         //resume
         rec.record()
         pauseButton.innerHTML="Pause";
+        document.getElementById("status").innerHTML = "recording ...";
 
     }
 }
@@ -76,7 +77,7 @@ function stopRecording() {
     rec.stop();
     gumStream.getAudioTracks()[0].stop();
     rec.exportWAV(post_to_server);
-    document.getElementById("status").innerHTML = "not started";
+    document.getElementById("status").innerHTML = "click start recording";
 }
 
 
