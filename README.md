@@ -14,7 +14,7 @@ To run the flask server:
 
 pip3 install -r requirement.txt
 
-download denoiser.th from drive
+download denoiser.th from drive (trained on Valentini dataset and DNS dataset on 64 hidden layers)
 
 move denoiser.th to env/denoiser/ folder
 
