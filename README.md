@@ -20,26 +20,26 @@ cd env
 
 flask run
 
-open in site chrome
+open site in chrome
 
 
 ****
 
 TODO: 
 
-- [ ] add extra denoising function using filters (especially low noises)
+- [ ] Add extra denoising function using filters (especially low noises)
 
-- [ ] head tracking
+- [ ] Head tracking
 
-- [ ] depth sensing
+- [ ] Depth sensing
 
-- [ ] receive video data from Jetson
+- [ ] Receive video data from Jetson
 
-- [ ] improve web page;
+- [ ] Improve web page;
  
-- [ ] allow user to select from available audio input/output from the web page  
+- [ ] Allow user to select from available audio input/output from the web page  
 
-- [ ] allow user to switch between denoising input and denoising output from  the web page
+- [ ] Allow user to switch between denoising input and denoising output from  the web page
 
 - [ ] Maybe continue the training with other datasets to improve performance
 
