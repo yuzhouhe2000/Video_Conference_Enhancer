@@ -80,9 +80,6 @@ function stopRecording() {
 }
 
 
-
-
-
 function startlive() {
     
     recordButton.disabled = true;
