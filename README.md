@@ -16,6 +16,8 @@ pip3 install -r requirement.txt
 
 download denoiser.th from drive
 
+move denoiser.th to env/denoiser/ folder
+
 cd env
 
 flask run
