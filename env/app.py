@@ -139,7 +139,7 @@ def denoiser_live():
         model = deserialize_model(pkg)
 
     model.eval()
-    frame_num = 2
+    frame_num = 1
     streamer = DemucsStreamer(model, dry=DRY, num_frames=frame_num)
     sample_rate = 16_000
 
