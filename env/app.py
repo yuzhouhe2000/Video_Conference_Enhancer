@@ -27,7 +27,6 @@ from flask import send_from_directory
 
 # User library
 from denoiser.demucs import DemucsStreamer
-from denoiser.audio import Audioset, find_audio_files
 from denoiser.utils import deserialize_model
 
 # Initilize flask app and socketio
