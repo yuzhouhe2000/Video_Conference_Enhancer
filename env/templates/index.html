@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="UTF-8">
-    <title>语音检测</title>
+    <title>EE434 Project</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <style>
@@ -15,8 +15,8 @@
       }
 
       button {
-        border: none;
-        background-color: rgb(255, 255, 255); /* Green */
+        border: 3px solid rgb(0, 0, 0);
+        background-color: rgb(255, 255, 255); 
         color: rgb(0, 0, 0);
         padding: 15px 32px;
         text-align: center;
@@ -28,7 +28,7 @@
         transition-duration: 0.4s;
       }
       button:hover {
-        background-color: #181717; /* Green */
+        background-color: #181717; 
         color: white;
       }
 
@@ -39,7 +39,7 @@
         color: #d1d1d1;
       }
       </style>
-
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js" integrity="sha512-aMGMvNYu8Ue4G+fHa359jcPb1u+ytAF+P2SCb+PxrjCdO3n3ZTxJ30zuH39rimUggmTwmh2u7wvQsDTHESnmfQ==" crossorigin="anonymous"></script>
     <script type="text/javascript" charset="utf-8">
@@ -48,18 +48,21 @@
             socket.on('my_response', function(msg) {
                 $('#log').empty();
                 $('#log').append('<h2>' + $('<div/>').text(msg.data).html());
+                document.getElementById("playButton").disabled = false
             });
 
+            socket.on('count', function(msg) {
+              document.getElementById('count').setAttribute('num', msg.data)
+            });
         })
-      </script>
-      
+    </script>
   </head>
 
 
 
   <body>
     <h1>EE434 Project</h1>
-    <h2>denoiser test</h2>
+    <h2>Denoiser Sound Test</h2>
 
     <div id="controls">
      <button id="recordButton">start recording</button>
@@ -68,8 +71,11 @@
     </div>
 
     <div id="speechTranscriptContainer">
-      <h1 id = "status">click start recording</h1>
+      <h2 id = "status">click start recording</h2>
       <div id="log"></div>
+      <!-- style = "display:none" -->
+      <div id = "count" num="{{COUNT}}" ></div>
+      <button id="playButton" disabled>play enhanced</button>
     </div>
 
     <script src="/static/js/recorder.js"></script>

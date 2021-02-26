@@ -30,7 +30,7 @@ MODEL_PATH = "denoiser/denoiser.th"
 
 
 DRY = 0.04
-
+COUNT = 0
 
 
 def save_wavs(estimates, noisy_sigs, filenames, out_dir, sr=16_000):
@@ -47,47 +47,67 @@ def write(wav, filename, sr=16_000):
     torchaudio.save(filename, wav, sr)
 
 
+app.config['UPLOAD_FOLDER'] = 'sound'
+
+from flask import send_from_directory
+
+@app.route('/sound/<filename>')
+def uploaded_file(filename):
+    response =  send_from_directory(app.config['UPLOAD_FOLDER'],
+                               filename)
+    return response
+
+
 @app.route("/", methods=['POST', 'GET'])
 def index():
-    if request.method == "POST":
-        start_time = time.time()
-        f = request.files['audio_data']
-        with open('audio.wav', 'wb') as audio:
-            f.save(audio)
-        sound = am.from_wav('audio.wav')
-        sound = sound.set_frame_rate(16000)
-        sound.export('audio_16.wav', format='wav')
-        
-        pkg = torch.load(MODEL_PATH)
-        if 'model' in pkg:
-            if 'best_state' in pkg:
-                pkg['model']['state'] = pkg['best_state']
-            model = deserialize_model(pkg['model'])
-        else:
-            model = deserialize_model(pkg)
-
-        model.eval()
-        file = 'audio_16.wav'
-        siginfo, _ = torchaudio.info(file)
-        length = siginfo.length
-        
-        num_frames = length
-        out, sr = torchaudio.load(str(file), offset=0,num_frames=num_frames)
-        out = F.pad(out, (0, num_frames - out.shape[-1]))
-
-        # loader = distrib.loader(recorded, batch_size=1)
-        # distrib.barrier()
-        torch.set_num_threads(1)
-
-        with torch.no_grad():
-            estimate = model(out)
-            estimate = (1 - DRY) * estimate + DRY * out
     
-        write(estimate[0],"enhanced.wav",sr)
+    if request.method == "POST":
+        try:
+    
+            global COUNT   
+            f = request.files['audio_data']
+            with open('sound/audio.wav', 'wb') as audio:
+                f.save(audio)
+            sound = am.from_wav('sound/audio.wav')
+            sound = sound.set_frame_rate(16000)
+            sound.export('sound/audio_16.wav', format='wav')
+            
+            pkg = torch.load(MODEL_PATH)
+            if 'model' in pkg:
+                if 'best_state' in pkg:
+                    pkg['model']['state'] = pkg['best_state']
+                model = deserialize_model(pkg['model'])
+            else:
+                model = deserialize_model(pkg)
 
-        RESULT = ""
+            model.eval()
+            file = 'sound/audio_16.wav'
+            siginfo, _ = torchaudio.info(file)
+            length = siginfo.length
+            
+            num_frames = length
+            
+            out, sr = torchaudio.load(str(file), offset=0,num_frames=num_frames)
+            out = F.pad(out, (0, num_frames - out.shape[-1]))
+
+            torch.set_num_threads(1)
+
+            with torch.no_grad():
+                start_time = time.time()
+                estimate = model(out)
+                estimate = (1 - DRY) * estimate + DRY * out
+                end_time = time.time()
+            
+            name = "sound/enhanced"+ str(COUNT) + ".wav"
+            write(estimate[0],name,sr)
+            
+            RESULT = "The enhancement is successful, takes %.4f seconds"%(end_time - start_time)
+        except:
+            RESULT = "The enhancement failed"
+            
         socketio.emit('my_response',{'data': RESULT})
-        print("--- %s seconds ---" % (time.time() - start_time))
+        socketio.emit('count',{'data': str(COUNT)})
+        COUNT = COUNT + 1
         return ('', 204)
     else:
         return render_template("index.html")
