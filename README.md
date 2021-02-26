@@ -29,6 +29,8 @@ open site in chrome
 
 TODO: 
 
+- [X] Template for flask app + a basic denoiser model 
+
 - [ ] Using voice activity detection to reduce denoiser computation, and also prevent distortion when no speech is detected
 
 - [ ] Adjust sound volume (mono/bi channel) by speaker position
@@ -36,6 +38,8 @@ TODO:
 - [ ] Add extra denoising function using filters (especially low noises)
 
 - [ ] Use video data for denoising
+
+- [ ] Design a method to access denoising performance and time lag
 
 - [ ] Head tracking
 
