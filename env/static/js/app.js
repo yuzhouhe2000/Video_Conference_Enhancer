@@ -11,6 +11,8 @@ var recordButton = document.getElementById("recordButton");
 var stopButton = document.getElementById("stopButton");
 var pauseButton = document.getElementById("pauseButton");
 var playButton = document.getElementById("playButton");
+var liveButton = document.getElementById("liveButton");
+var stopLive = document.getElementById("stopLive");
 
 
 
@@ -19,6 +21,9 @@ recordButton.addEventListener("click", startRecording);
 stopButton.addEventListener("click", stopRecording);
 pauseButton.addEventListener("click", pauseRecording);
 
+liveButton.addEventListener("click", startlive);
+stopLive.addEventListener("click", stoplive);
+
 
 function startRecording() {
     
@@ -26,6 +31,7 @@ function startRecording() {
     recordButton.disabled = true;
     stopButton.disabled = false;
     pauseButton.disabled = false;
+    playButton.disabled = true;
 
     navigator.mediaDevices.getUserMedia(constraints).then(function(stream) {
         audioContext = new AudioContext();
@@ -65,14 +71,56 @@ function stopRecording() {
     stopButton.disabled = true;
     recordButton.disabled = false;
     pauseButton.disabled = true;
+    playButton.disabled = false;
     pauseButton.innerHTML="Pause";
     rec.stop();
     gumStream.getAudioTracks()[0].stop();
     rec.exportWAV(post_to_server);
-    document.getElementById("status").innerHTML = "click start recording";
+    document.getElementById("status").innerHTML = "Welcome to EE434 Project Demo";
 }
 
 
+
+
+
+function startlive() {
+    
+    recordButton.disabled = true;
+    stopButton.disabled = true;
+    pauseButton.disabled = true;
+    stopLive.disabled = false;
+    liveButton.disabled = true;
+    playButton.disabled = true;
+
+    var xhr=new XMLHttpRequest();
+    xhr.onload=function(e) {
+        if(this.readyState === 4) {
+            console.log("Server returned: ",e.target.responseText);
+        }
+    };
+    xhr.open("POST","/live",true);
+    xhr.send("fight on!");
+    document.getElementById("status").innerHTML = "denoiser on";
+}
+
+function stoplive() {
+    stopButton.disabled = true;
+    recordButton.disabled = false;
+    pauseButton.disabled = true;
+    stopLive.disabled = true;
+    liveButton.disabled = false;
+    playButton.disabled = false;
+
+    var xhr=new XMLHttpRequest();
+    xhr.onload=function(e) {
+        if(this.readyState === 4) {
+            console.log("Server returned: ",e.target.responseText);
+        }
+    };
+    xhr.open("POST","/endlive",true);
+    xhr.send("fight off!");
+    document.getElementById("status").innerHTML = "denoiser off";
+}
 
 
 
@@ -108,3 +156,7 @@ function playRecording() {
     var audio_file = '/sound/enhanced' + count + ".wav";
     playSound(audio_file);
 }
+
+
+
+
