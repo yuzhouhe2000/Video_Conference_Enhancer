@@ -31,6 +31,8 @@ TODO:
 
 - [ ] Using voice activity detection to reduce denoiser computation, and also prevent distortion when no speech is detected
 
+- [ ] Adjust sound volume (mono/bi channel) by speaker position
+
 - [ ] Add extra denoising function using filters (especially low noises)
 
 - [ ] Head tracking
