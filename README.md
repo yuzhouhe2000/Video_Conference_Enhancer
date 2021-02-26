@@ -29,6 +29,8 @@ open site in chrome
 
 TODO: 
 
+- [ ] Using voice activity detection to reduce denoiser computation, and also prevent distortion when no speech is detected
+
 - [ ] Add extra denoising function using filters (especially low noises)
 
 - [ ] Head tracking
@@ -45,4 +47,3 @@ TODO:
 
 - [ ] Maybe continue the training with other datasets to improve performance
 
-- [ ] Maybe using voice activity detection to reduce denoiser computation
