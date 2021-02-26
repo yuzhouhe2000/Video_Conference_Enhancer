@@ -35,6 +35,8 @@ TODO:
 
 - [ ] Add extra denoising function using filters (especially low noises)
 
+- [ ] Use video data for denoising
+
 - [ ] Head tracking
 
 - [ ] Depth sensing
