@@ -1,6 +1,6 @@
 # EE434 Project Updating 
 
-By Michael Pozzi, Matt Baseheart, Yuzhou He
+Team: Michael Pozzi, Matt Baseheart, Yuzhou He
 
 requirement.txt may not be complete, pip3 install the missing ones
 
