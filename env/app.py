@@ -4,7 +4,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # Python library
-from flask import Flask, render_template, request, redirect,url_for, json, render_template_string, jsonify
+from flask import Flask, render_template, request, redirect,url_for, json, render_template_string, jsonify, Response
 from flask_socketio import SocketIO, emit,send
 import flask_socketio
 from threading import Lock
@@ -23,11 +23,12 @@ import time
 from torch.nn import functional as F
 import sounddevice as sd
 from flask import send_from_directory
-
+import cv2
 
 # User library
 from denoiser.demucs import DemucsStreamer
 from denoiser.utils import deserialize_model
+from camera.camera import VideoCamera
 
 # Initilize flask app and socketio
 app = Flask(__name__)
@@ -39,6 +40,7 @@ MODEL_PATH = "denoiser/denoiser.th"
 DRY = 0.04
 COUNT = 0
 LIVE = 1
+CAMERA_CONTROl = 0
 
 # Save wav files for recording
 def save_wavs(estimates, noisy_sigs, filenames, out_dir, sr=16_000):
@@ -234,6 +236,31 @@ def control_panel():
         #return jsonify({'volume': volume})
     return ('', 204)
 
+
+def gen(camera):
+    global CAMERA_CONTROl
+    while(1):
+        if CAMERA_CONTROl == 1:
+            frame = camera.get_frame()
+            yield (b'--frame\r\n'
+                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
+
+@app.route('/video_feed')
+def video_feed():
+    return Response(gen(VideoCamera()),
+                        mimetype='multipart/x-mixed-replace; boundary=frame')
+
+
+
+@app.route('/camera_control',methods=['POST','GET'])
+def camera_control():
+    global CAMERA_CONTROl
+    if CAMERA_CONTROl == 0:
+        CAMERA_CONTROl = 1
+        
+    else:
+        CAMERA_CONTROl = 0
+    return ('', 204)
 
 if __name__ == '__main__':
     socketio.run(app)

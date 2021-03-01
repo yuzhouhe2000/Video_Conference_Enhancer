@@ -8,4 +8,4 @@ six
 sounddevice==0.4.0
 torchaudio==0.5.1
 torch==1.5.1
-
+opencv-python

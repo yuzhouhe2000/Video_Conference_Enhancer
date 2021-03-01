@@ -113,7 +113,12 @@
         <div id="log"></div>
         <div id = "count" num="{{COUNT}}" ></div>
     </div>
-
+    <div class="test_camera" style="height: 520px;"> 
+      <h2>video placeholder</h2>
+      
+      <img id="bg" src="{{ url_for('video_feed') }}">
+    </div>
+    <button id="cameraButton">Camera On</button>
     <script src="/static/js/recorder.js"></script>
     <script src="/static/js/app.js"></script>
   </body>
