@@ -31,27 +31,14 @@ TODO:
 
 - [X] Template for flask app + a basic denoiser model 
 
-- [ ] Using voice activity detection to reduce denoiser computation, and also prevent distortion when no speech is detected
-
 - [ ] Adjust sound volume (mono/bi channel) by speaker position
 
-- [ ] Add extra denoising function using filters (especially low noises)
+- [ ] Add extra denoising function using filters
 
-- [ ] Use video data for denoising
+- [ ] Face and mouth detection
 
-- [ ] Design a method to access denoising performance and time lag
+- [ ] Voice activity detection from mouth movement
 
-- [ ] Head tracking
+- [ ] Design a method to measure denoiser performance and time lag
 
 - [ ] Depth sensing
-
-- [ ] Receive video data from Jetson
-
-- [ ] Improve web page;
- 
-- [ ] Allow user to select from available audio input/output from the web page  
-
-- [ ] Allow user to switch between denoising input and denoising output from  the web page
-
-- [ ] Maybe continue the training with other datasets to improve performance
-
