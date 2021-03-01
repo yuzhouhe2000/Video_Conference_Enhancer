@@ -32,7 +32,7 @@ TODO:
 
 To run the flask server (linux/mac):
 
-    pip3 install -r requirement.txt
+    pip3 install -r requirements.txt
 
     download "denoiser.th" and "shape_predictor_68_face_landmarks.dat" from drive
 
