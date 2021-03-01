@@ -25,11 +25,23 @@ flask run
 open site in chrome
 
 
+if dlib fails to install, try:
+
+git clone https://github.com/davisking/dlib.git
+
+cd dlib
+
+mkdir build; cd build; cmake ..; cmake --build .
+
+cd ..
+
+python3 setup.py install
+
 ****
 
 TODO: 
 
-- [X] Template for flask app + a basic denoiser model 
+- [X] Template for flask app + a basic denoiser model
 
 - [ ] Adjust sound volume (mono/bi channel) by speaker position
 
@@ -42,3 +54,6 @@ TODO:
 - [ ] Design a method to measure denoiser performance and time lag
 
 - [ ] Depth sensing
+
+
+
