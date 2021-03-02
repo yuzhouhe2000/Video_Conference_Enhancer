@@ -2,3 +2,7 @@
 *.th
 *.wav
 *.dat
+*.avi
+*.pyc
+*.mp4
+env/bin/*

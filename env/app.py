@@ -40,7 +40,8 @@ MODEL_PATH = "denoiser/denoiser.th"
 DRY = 0.04
 COUNT = 0
 LIVE = 1
-CAMERA_CONTROl = 0
+CAMERA_CONTROl = 1
+OLD_CAMERA_CONTROl = 1
 
 # Save wav files for recording
 def save_wavs(estimates, noisy_sigs, filenames, out_dir, sr=16_000):
@@ -174,45 +175,42 @@ def denoiser_live():
 
 
     while (LIVE == 1):
-        try:
-            if current_time > last_log_time + log_delta:
-                last_log_time = current_time
-                tpf = streamer.time_per_frame * 1000
-                rtf = tpf / stride_ms
-                print(f"time per frame: {tpf:.1f}ms, ", end='')
-                print(f"RTF: {rtf:.1f}")
-                streamer.reset_time_per_frame()
+        if current_time > last_log_time + log_delta:
+            last_log_time = current_time
+            tpf = streamer.time_per_frame * 1000
+            rtf = tpf / stride_ms
+            print(f"time per frame: {tpf:.1f}ms, ", end='')
+            print(f"RTF: {rtf:.1f}")
+            streamer.reset_time_per_frame()
+        last_log_time = current_time
+        length = streamer.total_length if first else streamer.stride
+        first = False
+        current_time += length / sample_rate
+        frame, overflow = stream_in.read(length)
+        frame = torch.from_numpy(frame).mean(dim=1).to("cpu")
+        with torch.no_grad():
+            out = streamer.feed(frame[None])[0]
+        if not out.numel():
+            continue
+        # compresser
+        # out = 0.99 * torch.tanh(out)
 
-            length = streamer.total_length if first else streamer.stride
-            first = False
-            current_time += length / sample_rate
-            frame, overflow = stream_in.read(length)
-            frame = torch.from_numpy(frame).mean(dim=1).to("cpu")
-            with torch.no_grad():
-                out = streamer.feed(frame[None])[0]
-            if not out.numel():
-                continue
-            # compresser
-            # out = 0.99 * torch.tanh(out)
-
-            out = out[:, None].repeat(1, channels_out)
-            mx = out.abs().max().item()
-            if mx > 1:
-                print("Clipping!!")
-            out.clamp_(-1, 1)
-            out = out.cpu().numpy()
-            underflow = stream_out.write(out)
-            if overflow or underflow:
-                if current_time >= last_error_time + cooldown_time:
-                    last_error_time = current_time
-                    tpf = 1000 * streamer.time_per_frame
-                    RESULT =  f"time per frame is {tpf:.1f}ms, need to be below {stride_ms:.1f}ms for acceptable quality"
-                    socketio.emit('my_response',{'data': RESULT})
-                    # print (f"Denoiser is running! time per frame is {tpf:.1f}ms, need to be below {stride_ms:.1f}ms")
-
-        except KeyboardInterrupt:
-            print("Stopping")
-            break
+        out = out[:, None].repeat(1, channels_out)
+        mx = out.abs().max().item()
+        if mx > 1:
+            print("Clipping!!")
+        out.clamp_(-1, 1)
+        out = out.cpu().numpy()
+        underflow = stream_out.write(out)
+        if overflow or underflow:
+            if current_time >= last_error_time + cooldown_time:
+                last_error_time = current_time
+                tpf = 1000 * streamer.time_per_frame
+                RESULT =  f"time per frame is {tpf:.1f}ms, need to be below {stride_ms:.1f}ms for acceptable quality"
+                socketio.emit('my_response',{'data': RESULT})
+                print(f"time per frame is {tpf:.1f}ms, need to be below {stride_ms:.1f}ms for acceptable quality")
+                # print (f"Denoiser is running! time per frame is {tpf:.1f}ms, need to be below {stride_ms:.1f}ms")
+            
 
     stream_out.stop()
     stream_in.stop()
@@ -239,20 +237,27 @@ def control_panel():
 
 def gen(camera):
     global CAMERA_CONTROl
+    global OLD_CAMERA_CONTROl
     while(1):
         if CAMERA_CONTROl == 1:
+            camera = VideoCamera()
             frame = camera.get_frame()
             yield (b'--frame\r\n'
                 b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
+        if OLD_CAMERA_CONTROl == 1 and CAMERA_CONTROl == 0:
+            camera.close()
+        if OLD_CAMERA_CONTROl == 0 and CAMERA_CONTROl == 0:
+            time.sleep(0.4)
+        OLD_CAMERA_CONTROl = CAMERA_CONTROl
+        
+            
 
 @app.route('/video_feed')
 def video_feed():
     return Response(gen(VideoCamera()),
                         mimetype='multipart/x-mixed-replace; boundary=frame')
 
-
-
-@app.route('/camera_control',methods=['POST','GET'])
+@app.route('/camera_control',methods=['POST'])
 def camera_control():
     global CAMERA_CONTROl
     if CAMERA_CONTROl == 0:
