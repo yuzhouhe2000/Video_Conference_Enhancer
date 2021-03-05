@@ -25,10 +25,12 @@ import sounddevice as sd
 from flask import send_from_directory
 import cv2
 
+
 # User library
 from denoiser.demucs import DemucsStreamer
 from denoiser.utils import deserialize_model
 from camera.camera import VideoCamera
+from denoiser.VAD import denoiser_VAD
 
 # Initilize flask app and socketio
 app = Flask(__name__)
@@ -42,6 +44,7 @@ COUNT = 0
 LIVE = 1
 CAMERA_CONTROl = 1
 OLD_CAMERA_CONTROl = 1
+VAD_RESULT = 0
 
 # Save wav files for recording
 def save_wavs(estimates, noisy_sigs, filenames, out_dir, sr=16_000):
@@ -107,6 +110,7 @@ def index():
                 end_time = time.time()
             
             name = "sound/enhanced"+ str(COUNT) + ".wav"
+    
             write(estimate[0],name,sr)
             
             RESULT = "The enhancement is successful, takes %.4f seconds"%(end_time - start_time)
@@ -130,6 +134,7 @@ def query_devices(device, kind):
 
 @app.route("/live", methods=['POST'])
 def denoiser_live():
+    global VAD_RESULT
     global LIVE
     LIVE = 1
     print("live request")
@@ -144,6 +149,7 @@ def denoiser_live():
     model.eval()
     frame_num = 1
     streamer = DemucsStreamer(model, dry=DRY, num_frames=frame_num)
+
     sample_rate = 16_000
 
     caps = query_devices(None, "input")
@@ -187,30 +193,32 @@ def denoiser_live():
         first = False
         current_time += length / sample_rate
         frame, overflow = stream_in.read(length)
-        frame = torch.from_numpy(frame).mean(dim=1).to("cpu")
-        with torch.no_grad():
-            out = streamer.feed(frame[None])[0]
-        if not out.numel():
-            continue
-        # compresser
-        # out = 0.99 * torch.tanh(out)
+  
+        if VAD_RESULT == 1:
+            frame = torch.from_numpy(frame).mean(dim=1).to("cpu")
+            with torch.no_grad():
+                out = streamer.feed(frame[None])[0]
+            if not out.numel():
+                continue
+            # compresser
+            # out = 0.99 * torch.tanh(out)
 
-        out = out[:, None].repeat(1, channels_out)
-        mx = out.abs().max().item()
-        if mx > 1:
-            print("Clipping!!")
-        out.clamp_(-1, 1)
-        out = out.cpu().numpy()
-        underflow = stream_out.write(out)
-        if overflow or underflow:
-            if current_time >= last_error_time + cooldown_time:
-                last_error_time = current_time
-                tpf = 1000 * streamer.time_per_frame
-                RESULT =  f"time per frame is {tpf:.1f}ms, need to be below {stride_ms:.1f}ms for acceptable quality"
-                socketio.emit('my_response',{'data': RESULT})
-                print(f"time per frame is {tpf:.1f}ms, need to be below {stride_ms:.1f}ms for acceptable quality")
-                # print (f"Denoiser is running! time per frame is {tpf:.1f}ms, need to be below {stride_ms:.1f}ms")
-            
+            out = out[:, None].repeat(1, channels_out)
+            mx = out.abs().max().item()
+            if mx > 1:
+                print("Clipping!!")
+            out.clamp_(-1, 1)
+            out = out.cpu().numpy()
+            underflow = stream_out.write(out)
+            if overflow or underflow:
+                if current_time >= last_error_time + cooldown_time:
+                    last_error_time = current_time
+                    tpf = 1000 * streamer.time_per_frame
+                    RESULT =  f"time per frame is {tpf:.1f}ms, need to be below {stride_ms:.1f}ms for acceptable quality"
+                    socketio.emit('my_response',{'data': RESULT})
+                    print(f"time per frame is {tpf:.1f}ms, need to be below {stride_ms:.1f}ms for acceptable quality")
+                    # print (f"Denoiser is running! time per frame is {tpf:.1f}ms, need to be below {stride_ms:.1f}ms")
+                
 
     stream_out.stop()
     stream_in.stop()
@@ -232,6 +240,25 @@ def control_panel():
         print('volume:', volume)
         DRY = int(volume)/1000
         #return jsonify({'volume': volume})
+    return ('', 204)
+
+
+@app.route('/VAD', methods=['POST'])
+def VAD():
+    global LIVE
+    global VAD_RESULT
+    caps = query_devices(None, "input")
+    channels_in = min(caps['max_input_channels'], 2)
+    stream_in = sd.InputStream(
+        device=None,
+        samplerate=16_000,
+        channels=channels_in)    
+    stream_in.start()
+    while(LIVE == 1):
+        frame, overflow = stream_in.read(360)
+        VAD_RESULT = denoiser_VAD(frame)
+        print(VAD_RESULT)
+
     return ('', 204)
 
 

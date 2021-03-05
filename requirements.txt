@@ -10,3 +10,4 @@ torchaudio==0.5.1
 torch==1.5.1
 opencv-python
 dlib
+torchvision==0.8.1

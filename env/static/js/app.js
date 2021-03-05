@@ -98,6 +98,8 @@ function startlive() {
     };
     xhr.open("POST","/live",true);
     xhr.send("fight on!");
+    xhr.open("POST","/VAD",true);
+    xhr.send("fight on!");
     document.getElementById("status").innerHTML = "denoiser on";
 }
 
