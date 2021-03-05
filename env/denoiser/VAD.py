@@ -118,6 +118,7 @@ def denoiser_VAD(frame):
     return(result)
 
 
+# dur_net = str((time.time() - start_net)*1000).split('.')[0]
 
 
 

@@ -17,16 +17,17 @@ TODO:
 
 - [x] Face and mouth detection
 
+- [x] Voice Activity Detection using voice
+
 - [ ] Adjust sound volume (mono/bi channel) by speaker position
 
 - [ ] Add extra denoising function using filters
 
 - [ ] Voice activity detection from mouth movement
 
-- [ ] Design a method to measure denoiser performance and time lag
+- [ ] Depth sensing using eye separation
 
-- [ ] Depth sensing
-
+- [ ] Allow the project to be ran on Jetson with Gstreamer
 
 ****
 
