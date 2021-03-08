@@ -1,5 +1,7 @@
 # EE434 Project Updating 
 
+A software that receive audio & video input and enhance them in real time. Possible application: meeting (using feedback loop in apps like Zoom) and speech/lecture recording/streaming. The software will denoise the received audio and enhance the audio performance based on video infomation. Also, a pan tilt system will be used to let the camera focus on the speaker all the time.
+
 Team: Michael Pozzi, Matt Baseheart, Yuzhou He
 
 requirements.txt may not be complete, pip3 install the missing ones
@@ -37,9 +39,9 @@ To run the flask server (linux/mac):
 
     download "denoiser.th" and "shape_predictor_68_face_landmarks.dat" from drive
 
-    move "denoiser.th" to env/denoiser/
+    move "[denoiser.th](https://drive.google.com/file/d/17WuFlrUMJZdYiYEqvBfq4hmAd3x_NwDm/view?usp=sharing)" to env/denoiser/
 
-    move "shape_predictor_68_face_landmarks.dat" to env/camera/
+    move "[shape_predictor_68_face_landmarks.dat](https://drive.google.com/file/d/1skzv2u-eo2ySiN9yJ0jTLcZwwJWxg-d1/view?usp=sharing))" to env/camera/
 
     cd env
 

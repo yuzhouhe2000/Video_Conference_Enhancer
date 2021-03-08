@@ -73,49 +73,48 @@ def uploaded_file(filename):
 def index():
     
     if request.method == "POST":
-        try:
+
     
-            global COUNT   
-            f = request.files['audio_data']
-            with open('sound/audio.wav', 'wb') as audio:
-                f.save(audio)
-            sound = am.from_wav('sound/audio.wav')
-            sound = sound.set_frame_rate(16000)
-            sound.export('sound/audio_16.wav', format='wav')
-            
-            pkg = torch.load(MODEL_PATH)
-            if 'model' in pkg:
-                if 'best_state' in pkg:
-                    pkg['model']['state'] = pkg['best_state']
-                model = deserialize_model(pkg['model'])
-            else:
-                model = deserialize_model(pkg)
+        global COUNT   
+        f = request.files['audio_data']
+        with open('sound/audio.wav', 'wb') as audio:
+            f.save(audio)
+        sound = am.from_wav('sound/audio.wav')
+        sound = sound.set_frame_rate(16000)
+        sound.export('sound/audio_16.wav', format='wav')
+        
+        pkg = torch.load(MODEL_PATH)
+        if 'model' in pkg:
+            if 'best_state' in pkg:
+                pkg['model']['state'] = pkg['best_state']
+            model = deserialize_model(pkg['model'])
+        else:
+            model = deserialize_model(pkg)
 
-            model.eval()
-            file = 'sound/audio_16.wav'
-            siginfo, _ = torchaudio.info(file)
-            length = siginfo.length
-            
-            num_frames = length
-            
-            out, sr = torchaudio.load(str(file), offset=0,num_frames=num_frames)
-            out = F.pad(out, (0, num_frames - out.shape[-1]))
+        model.eval()
+        file = 'sound/audio_16.wav'
+        siginfo, _ = torchaudio.info(file)
+        length = siginfo.length
+        
+        num_frames = length
+        
+        out, sr = torchaudio.load(str(file), offset=0,num_frames=num_frames)
+        out = F.pad(out, (0, num_frames - out.shape[-1]))
 
-            torch.set_num_threads(1)
+        torch.set_num_threads(1)
 
-            with torch.no_grad():
-                start_time = time.time()
-                estimate = model(out)
-                estimate = (1 - DRY) * estimate + DRY * out
-                end_time = time.time()
-            
-            name = "sound/enhanced"+ str(COUNT) + ".wav"
-    
-            write(estimate[0],name,sr)
-            
-            RESULT = "The enhancement is successful, takes %.4f seconds"%(end_time - start_time)
-        except:
-            RESULT = "The enhancement failed"
+        with torch.no_grad():
+            start_time = time.time()
+            estimate = model(out)
+            estimate = (1 - DRY) * estimate + DRY * out
+            end_time = time.time()
+        
+        name = "sound/enhanced"+ str(COUNT) + ".wav"
+
+        write(estimate[0],name,sr)
+        
+        RESULT = "The enhancement is successful, takes %.4f seconds"%(end_time - start_time)
+
             
         socketio.emit('my_response',{'data': RESULT})
         socketio.emit('count',{'data': str(COUNT)})
