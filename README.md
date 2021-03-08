@@ -35,19 +35,19 @@ TODO:
 
 To run the flask server (linux/mac):
 
-    pip3 install -r requirements.txt
+download "denoiser.th" and "shape_predictor_68_face_landmarks.dat" from drive
 
-    download "denoiser.th" and "shape_predictor_68_face_landmarks.dat" from drive
+move "[denoiser.th](https://drive.google.com/file/d/17WuFlrUMJZdYiYEqvBfq4hmAd3x_NwDm/view?usp=sharing)" to env/denoiser/
 
-    move "[denoiser.th](https://drive.google.com/file/d/17WuFlrUMJZdYiYEqvBfq4hmAd3x_NwDm/view?usp=sharing)" to env/denoiser/
+move "[shape_predictor_68_face_landmarks.dat](https://drive.google.com/file/d/1skzv2u-eo2ySiN9yJ0jTLcZwwJWxg-d1/view?usp=sharing))" to env/camera/
 
-    move "[shape_predictor_68_face_landmarks.dat](https://drive.google.com/file/d/1skzv2u-eo2ySiN9yJ0jTLcZwwJWxg-d1/view?usp=sharing))" to env/camera/
+    1. pip3 install -r requirements.txt
 
-    cd env
+    2. cd env
 
-    flask run
+    3. flask run
 
-    open site in chrome
+    4. open site in chrome
 
 
 if dlib fails to install, try to install from source:
