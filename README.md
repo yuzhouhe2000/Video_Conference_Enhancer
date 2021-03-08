@@ -39,7 +39,7 @@ download "denoiser.th" and "shape_predictor_68_face_landmarks.dat" from drive
 
 move "[denoiser.th](https://drive.google.com/file/d/17WuFlrUMJZdYiYEqvBfq4hmAd3x_NwDm/view?usp=sharing)" to env/denoiser/
 
-move "[shape_predictor_68_face_landmarks.dat](https://drive.google.com/file/d/1skzv2u-eo2ySiN9yJ0jTLcZwwJWxg-d1/view?usp=sharing))" to env/camera/
+move "[shape_predictor_68_face_landmarks.dat](https://drive.google.com/file/d/1skzv2u-eo2ySiN9yJ0jTLcZwwJWxg-d1/view?usp=sharing)" to env/camera/
 
     1. pip3 install -r requirements.txt
 
