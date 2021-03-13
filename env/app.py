@@ -9,7 +9,7 @@ from flask_socketio import SocketIO, emit,send
 import flask_socketio
 from threading import Lock
 import torch
-import torchaudio
+# import torchaudio
 from torch import nn
 import os
 import itertools
@@ -75,50 +75,50 @@ def index():
     if request.method == "POST":
 
     
-        global COUNT   
-        f = request.files['audio_data']
-        with open('sound/audio.wav', 'wb') as audio:
-            f.save(audio)
-        sound = am.from_wav('sound/audio.wav')
-        sound = sound.set_frame_rate(16000)
-        sound.export('sound/audio_16.wav', format='wav')
+        # global COUNT   
+        # f = request.files['audio_data']
+        # with open('sound/audio.wav', 'wb') as audio:
+        #     f.save(audio)
+        # sound = am.from_wav('sound/audio.wav')
+        # sound = sound.set_frame_rate(16000)
+        # sound.export('sound/audio_16.wav', format='wav')
         
-        pkg = torch.load(MODEL_PATH)
-        if 'model' in pkg:
-            if 'best_state' in pkg:
-                pkg['model']['state'] = pkg['best_state']
-            model = deserialize_model(pkg['model'])
-        else:
-            model = deserialize_model(pkg)
+        # pkg = torch.load(MODEL_PATH)
+        # if 'model' in pkg:
+        #     if 'best_state' in pkg:
+        #         pkg['model']['state'] = pkg['best_state']
+        #     model = deserialize_model(pkg['model'])
+        # else:
+        #     model = deserialize_model(pkg)
 
-        model.eval()
-        file = 'sound/audio_16.wav'
-        siginfo, _ = torchaudio.info(file)
-        length = siginfo.length
+        # model.eval()
+        # file = 'sound/audio_16.wav'
+        # siginfo, _ = torchaudio.info(file)
+        # length = siginfo.length
         
-        num_frames = length
+        # num_frames = length
         
-        out, sr = torchaudio.load(str(file), offset=0,num_frames=num_frames)
-        out = F.pad(out, (0, num_frames - out.shape[-1]))
+        # out, sr = torchaudio.load(str(file), offset=0,num_frames=num_frames)
+        # out = F.pad(out, (0, num_frames - out.shape[-1]))
 
-        torch.set_num_threads(1)
+        # torch.set_num_threads(1)
 
-        with torch.no_grad():
-            start_time = time.time()
-            estimate = model(out)
-            estimate = (1 - DRY) * estimate + DRY * out
-            end_time = time.time()
+        # with torch.no_grad():
+        #     start_time = time.time()
+        #     estimate = model(out)
+        #     estimate = (1 - DRY) * estimate + DRY * out
+        #     end_time = time.time()
         
-        name = "sound/enhanced"+ str(COUNT) + ".wav"
+        # name = "sound/enhanced"+ str(COUNT) + ".wav"
 
-        write(estimate[0],name,sr)
+        # write(estimate[0],name,sr)
         
-        RESULT = "The enhancement is successful, takes %.4f seconds"%(end_time - start_time)
+        # RESULT = "The enhancement is successful, takes %.4f seconds"%(end_time - start_time)
 
             
-        socketio.emit('my_response',{'data': RESULT})
-        socketio.emit('count',{'data': str(COUNT)})
-        COUNT = COUNT + 1
+        # socketio.emit('my_response',{'data': RESULT})
+        # socketio.emit('count',{'data': str(COUNT)})
+        # COUNT = COUNT + 1
         return ('', 204)
     else:
         return render_template("index.html")
@@ -254,7 +254,7 @@ def VAD():
         channels=channels_in)    
     stream_in.start()
     while(LIVE == 1):
-        frame, overflow = stream_in.read(360)
+        frame, overflow = stream_in.read(20)
         VAD_RESULT = denoiser_VAD(frame)
         print(VAD_RESULT)
 

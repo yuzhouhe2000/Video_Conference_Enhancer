@@ -37,7 +37,6 @@ FRAME_SIZE_MS = 30
 FRAME_SIZE = int(SAMPLE_RATE * (FRAME_SIZE_MS / 1000.0))
 FRAMES = 20
 FEATURES = 12
-
 OBJ_CUDA = torch.cuda.is_available()
 
 if OBJ_CUDA:
@@ -81,6 +80,9 @@ RESULT = ""
 mfcc_stream = []
 count = 0
 result = -1
+model.load_state_dict(torch.load("denoiser/lstm.net",map_location=torch.device(device)))
+model.eval()
+
 def denoiser_VAD(frame):
     global result
     global mfcc_stream
@@ -105,12 +107,9 @@ def denoiser_VAD(frame):
                 mfcc_stream_array = mfcc_stream_array.transpose(1,0,2)
                 mfcc_stream_array = mfcc_stream_array.astype(np.float32)
                 test_data_tensor = torch.from_numpy(mfcc_stream_array).to(device)
-                model.load_state_dict(torch.load("denoiser/lstm.net",map_location=torch.device(device)))
-                model.eval()
                 output = model(test_data_tensor).to(device)
                 pred_y = torch.max(output, 1)[1].data.numpy()
                 result = pred_y[0]
-
                 end = time.time()
                 print(result)
                 count = 0
