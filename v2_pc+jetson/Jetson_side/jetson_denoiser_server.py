@@ -26,6 +26,7 @@ sample_rate = 16_000
 CONNECTED = 0
 
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+
 print(device)
 
 # Load Model
