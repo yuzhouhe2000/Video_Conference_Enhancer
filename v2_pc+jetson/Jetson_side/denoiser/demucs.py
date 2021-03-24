@@ -222,7 +222,7 @@ class DemucsStreamer:
                  resample_lookahead=64,
                  resample_buffer=256):
         # device = next(iter(demucs.parameters())).device
-        device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+        device = th.device('cuda:0' if th.cuda.is_available() else 'cpu')
         self.demucs = demucs
         self.lstm_state = None
         self.conv_state = None
