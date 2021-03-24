@@ -6,7 +6,7 @@ predictor = dlib.shape_predictor("camera/shape_predictor_68_face_landmarks.dat")
 detector = dlib.get_frontal_face_detector()
 
 ds_factor=0.6
-class VideoCamera(object):
+class face_mark(object):
     def __init__(self):
        #capturing video
        self.video = cv2.VideoCapture(0)

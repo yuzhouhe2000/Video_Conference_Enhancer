@@ -3,14 +3,15 @@ import torch
 import numpy as np
 import time
 import socket
+import threading
 
 from denoiser.demucs import DemucsStreamer
 from denoiser.utils import deserialize_model
 from denoiser.VAD import denoiser_VAD
 from npsocket import SocketNumpyArray
 
-inport = 9997
-outport = 9998
+inport = 9998
+outport = 9999
 
 # Define Server Socket (receiver)
 server_denoiser_receiver = SocketNumpyArray()
@@ -35,11 +36,22 @@ else:
     model = deserialize_model(pkg)
 model.eval()
 
+# Threads
+audio_buffer = []
+threads = []
+
+
+def receive_audio():
+    global audio_buffer
+    while True: 
+        frame = server_denoiser_receiver.receive_array()
+        audio_buffer.append(frame)
+
 
 
 def denoiser_live():
-    global LIVE
     global server_denoiser_sender
+    global audio_buffer
     CONNECTED = 0
     print("denoiser_start")
     first = True
@@ -55,55 +67,71 @@ def denoiser_live():
     print(f"Ready to process audio, total lag: {streamer.total_length / sr_ms:.1f}ms.")
 
     while True:
-        frame = server_denoiser_receiver.receive_array()
-        # VAD_RESULT = denoiser_VAD(frame)
-        VAD_RESULT = 1
+        start = time.time()
+        if len(audio_buffer) > 0:
+            while len(audio_buffer) > 3:
+                del(audio_buffer[0])
+            frame = audio_buffer[0]
+            print(len(audio_buffer))
+            del(audio_buffer[0])
+            print(len(audio_buffer))
 
-        if current_time > last_log_time + log_delta:
+            # VAD_RESULT = denoiser_VAD(frame)
+            VAD_RESULT = 1
+
+            if current_time > last_log_time + log_delta:
+                last_log_time = current_time
+                tpf = streamer.time_per_frame * 1000
+                rtf = tpf / stride_ms
+                print(f"time per frame: {tpf:.1f}ms, ", end='')
+                print(f"RTF: {rtf:.1f}")
+                streamer.reset_time_per_frame()
+
             last_log_time = current_time
-            tpf = streamer.time_per_frame * 1000
-            rtf = tpf / stride_ms
-            print(f"time per frame: {tpf:.1f}ms, ", end='')
-            print(f"RTF: {rtf:.1f}")
-            streamer.reset_time_per_frame()
+            length = streamer.total_length if first else streamer.stride
 
-        last_log_time = current_time
-        length = streamer.total_length if first else streamer.stride
+            first = False
+            current_time += length / sample_rate
 
-        first = False
-        current_time += length / sample_rate
+            if VAD_RESULT == 1:
+                frame = torch.from_numpy(frame).mean(dim=1).to(device)
+                with torch.no_grad():
+                    out = streamer.feed(frame[None])[0]
 
-        if VAD_RESULT == 1:
+                # if not out.numel():
+                #     continue
+                # compresser
+        #         # out = 0.99 * torch.tanh(out)
 
-            frame = torch.from_numpy(frame).mean(dim=1).to(device)
-            with torch.no_grad():
-                out = streamer.feed(frame[None])[0]
+                # TODO:Maybe it is 2 in the repeat
+                # print("check")
+                # out = out[:, None].repeat(1,1)
+                # mx = out.abs().max().item()
+                # if mx > 1:
+                #     print("Clipping!!")
+                out.clamp_(-1, 1)
+                out = out.cpu().numpy()
+                
 
-            # if not out.numel():
-            #     continue
-            # compresser
-    #         # out = 0.99 * torch.tanh(out)
+                if CONNECTED == 0:
+                    server_denoiser_sender.initialize_sender('localhost', outport)
+                    server_denoiser_sender.send_numpy_array(out)
+                    CONNECTED = 1
+                else:
+                    server_denoiser_sender.send_numpy_array(out)
+                    print(time.time()-start)
 
-            # TODO:Maybe it is 2 in the repeat
-            # print("check")
-            # out = out[:, None].repeat(1,1)
-            # mx = out.abs().max().item()
-            # if mx > 1:
-            #     print("Clipping!!")
-            out.clamp_(-1, 1)
-            out = out.cpu().numpy()
-            print(out)
 
-            if CONNECTED == 0:
-                server_denoiser_sender.initialize_sender('localhost', outport)
-                server_denoiser_sender.send_numpy_array(out)
-                CONNECTED = 1
-            else:
-                server_denoiser_sender.send_numpy_array(out)
 
+threads.append(threading.Thread(target=receive_audio))
+threads.append(threading.Thread(target=denoiser_live))
+print(threads)
 
 if __name__ == '__main__':
-    denoiser_live()
+    for thread in threads:
+        print(thread)
+        thread.start()
+
 
 
 

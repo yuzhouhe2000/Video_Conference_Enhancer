@@ -26,6 +26,15 @@ function startlive() {
             console.log("Server returned: ",e.target.responseText);
         }
     };
+    xhr.open("POST","/output_audio",true);
+    xhr.send("fight on!");
+    
+    var xhr=new XMLHttpRequest();
+    xhr.onload=function(e) {
+        if(this.readyState === 4) {
+            console.log("Server returned: ",e.target.responseText);
+        }
+    };
     xhr.open("POST","/live",true);
     xhr.send("fight on!");
     document.getElementById("status").innerHTML = "denoiser on";
@@ -61,9 +70,6 @@ function cameraon() {
     xhr.open("POST","/camera_control",true);
     xhr.send("switch!");
 }
-
-
-
 
 
 

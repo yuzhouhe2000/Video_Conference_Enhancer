@@ -19,9 +19,8 @@ CAMERA_CONTROl = 1
 OLD_CAMERA_CONTROl = 1
 VAD_RESULT = 0
 
-
 client_denoiser_sender = SocketNumpyArray()
-client_denoiser_sender.initialize_sender('localhost', 9997)
+client_denoiser_sender.initialize_sender('localhost', 9998)
 
 # main page
 @app.route("/", methods=['GET'])
@@ -41,10 +40,9 @@ def query_devices(device, kind):
 def denoiser_live():
     global VAD_RESULT
     global LIVE
-    CONNECTED = 0
+    
     LIVE = 1
     print("live request")
-
 
     sample_rate = 16_000
     caps = query_devices(None, "input")
@@ -54,6 +52,22 @@ def denoiser_live():
         samplerate=sample_rate,
         channels=channels_in)
 
+    stream_in.start()
+    
+    while (LIVE == 1):
+        # TODO: NEED to pass the overflow and underflow information
+        frame, overflow = stream_in.read(256)
+        # print(frame.shape)
+        client_denoiser_sender.send_numpy_array(frame)
+    
+    stream_in.stop()
+    return ('', 204)
+
+@app.route("/output_audio", methods=["POST"])
+def output_audio():
+    print("???")
+    CONNECTED = 0
+    sample_rate = 16000
     device_out = "Soundflower (2ch)"
     caps = query_devices(device_out, "output")
     channels_out = min(caps['max_output_channels'], 2)
@@ -61,35 +75,21 @@ def denoiser_live():
         device=None,
         samplerate=sample_rate,
         channels=channels_out)
-    
-    stream_in.start()
     stream_out.start()
-
-
-# ONLY FOR RECORD ON PC
-    while (LIVE == 1):
-
-        # TODO: NEED to pass the overflow and underflow information
-        # frame = [1]*20
-        # frame = np.ndarray(frame)
-        frame, overflow = stream_in.read(256)
-        print(frame.shape)
-        client_denoiser_sender.send_numpy_array(frame)
-        print("client_2")
+    print("???")
+    while True:
+        print("??")
         if CONNECTED == 0:
-            print("??")
             client_denoiser_receiver = SocketNumpyArray()
-            client_denoiser_receiver.initialize_receiver(9998) 
-            print("client_3") 
+            print("???")
+            client_denoiser_receiver.initialize_receiver(9999)
+            print("INITIALIZED") 
             CONNECTED = 1  
         else:
             out = client_denoiser_receiver.receive_array()
             stream_out.write(out)
-  
     stream_out.stop()
-    stream_in.stop()
     return ('', 204)
-
 
 
 @app.route("/endlive", methods=['POST'])
@@ -146,7 +146,6 @@ def camera_control():
 #     else:
 #         CAMERA_CONTROl = 0
     return('', 204)
-
 
 
 
