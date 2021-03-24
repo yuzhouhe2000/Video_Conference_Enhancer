@@ -196,7 +196,6 @@ def fast_conv(conv, x):
                        conv.weight.view(chout, chin * kernel), x)
     else:
         out = conv(x)
-
     return out.view(batch, chout, -1)
 
 
@@ -358,7 +357,6 @@ class DemucsStreamer:
                 x = encode[1](encode[0](x))
                 x = fast_conv(encode[2], x)
                 x = encode[3](x)
-                
                 if not first:
                     x = th.cat([prev, x], -1)
                 next_state.append(x)

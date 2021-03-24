@@ -10,8 +10,8 @@ from denoiser.utils import deserialize_model
 # from denoiser.VAD import denoiser_VAD
 from npsocket import SocketNumpyArray
 
-inport = 9993
-outport = 8080
+inport = 9992
+outport = 9991
 
 # Define Server Socket (receiver)
 server_denoiser_receiver = SocketNumpyArray()
@@ -36,7 +36,6 @@ if 'model' in pkg:
     model = deserialize_model(pkg['model'])
 else:
     model = deserialize_model(pkg)
-model.cuda('cuda:0')
 model.eval()
 
 # Threads
@@ -116,12 +115,12 @@ def denoiser_live():
                 out = out.cpu().numpy()
                 
 
-                # if CONNECTED == 0:
-                #     server_denoiser_sender.initialize_sender('192.168.5.138', outport)
-                #     CONNECTED = 1
-                # else:
-                #     server_denoiser_sender.send_numpy_array(out)
-                #     print(time.time()-start)
+                if CONNECTED == 0:
+                    server_denoiser_sender.initialize_sender('127.0.0.1', outport)
+                    CONNECTED = 1
+                else:
+                    server_denoiser_sender.send_numpy_array(out)
+                    print(time.time()-start)
 
 
 

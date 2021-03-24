@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>EE434 Project</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+      body {
+        background-color: rgb(255, 255, 255);
+        text-align: center;
+        color: rgb(0, 0, 0);
+        font-family: Arial, Helvetica, sans-serif;
+        
+      }
+
+      button {
+        border: 3px solid rgb(0, 0, 0);
+        background-color: rgb(255, 255, 255); 
+        color: rgb(0, 0, 0);
+        padding: 15px 32px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 20px;
+        margin: 4px 2px;
+        cursor: pointer;
+        transition-duration: 0.4s;
+      }
+      button:hover {
+        background-color: #252525; 
+        color: white;
+      }
+
+      button:disabled,
+      button[disabled]{
+        border: none;
+        background-color: #ffffff;
+        color: #d1d1d1;
+      }
+      </style>
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script> -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js" integrity="sha512-aMGMvNYu8Ue4G+fHa359jcPb1u+ytAF+P2SCb+PxrjCdO3n3ZTxJ30zuH39rimUggmTwmh2u7wvQsDTHESnmfQ==" crossorigin="anonymous"></script>
+    <script type="text/javascript" charset="utf-8">
+        $(document).ready(function() {
+            var socket = io();
+            socket.on('my_response', function(msg) {
+                $('#log').empty();
+                $('#log').append('<h2>' + $('<div/>').text(msg.data).html());
+                document.getElementById("playButton").disabled = false
+            });
+
+            socket.on('count', function(msg) {
+              document.getElementById('count').setAttribute('num', msg.data)
+            });
+        })
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js" integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI" crossorigin="anonymous"></script>
+  </head>
+
+  <body>
+    <h1>EE434 Project</h1>
+    </script>
+        <form action="/slide" method ="post" enctype="multipart/form-data" id="form">
+          <div class="row">
+                  <div class="col">
+                    <input id="slide" type="range" min="0" max="100" step="1" value="40" name="slide">
+                    <div id="sliderAmount"></div>
+                  </div>
+          </div>
+        </form>
+    </script>
+
+    <script>
+      var slide = document.getElementById('slide');
+      sliderDiv = document.getElementById("sliderAmount");
+      sliderDiv.innerHTML =  'Denoiser Level (default is 40): 40'
+      slide.onchange = function() {
+          sliderDiv.innerHTML =  'Denoiser Level (default is 40): ' + this.value;
+          $.post({
+                  url: '/slide',
+                  data: $('form').serialize(),
+              });
+          }
+    </script>
+   
+    <div class="test_temp" style="width:50%; height: 50px; float:left;">  <h2>Start Denoiser</h2>  </div>
+
+    <HR style="FILTER: alpha(opacity=100,finishopacity=0,style=3)" width="80%" color=#987cb9 SIZE=3>
+
+    <div class="test_temp" style="width:50%; height: 170px; float:left;"> 
+      <div id="live">
+        <button id="liveButton">start denoiser live</button>
+        <button id="stopLive" disabled>exit denoiser live</button>
+       </div>
+    </div>
+    <HR style="FILTER: alpha(opacity=100,finishopacity=0,style=3)" width="80%" color=#987cb9 SIZE=3>
+
+
+    <div id="speechTranscriptContainer">
+        <h2 id = "status">Welcome to EE434 Project Demo</h2>
+        <div id="log"></div>
+        <div id = "count" num="{{COUNT}}" ></div>
+    </div>
+    <div class="test_camera" style="height: 520px;"> 
+      <h2>video placeholder</h2>
+      
+      <!-- <img id="bg" src="{{ url_for('video_feed') }}"> -->
+    </div>
+    <button id="cameraButton">Camera OFF</button>
+    <script src="/static/js/recorder.js"></script>
+    <script src="/static/js/app.js"></script>
+  </body>
+</html>
