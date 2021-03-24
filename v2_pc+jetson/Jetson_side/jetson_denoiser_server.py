@@ -10,7 +10,7 @@ from denoiser.utils import deserialize_model
 # from denoiser.VAD import denoiser_VAD
 from npsocket import SocketNumpyArray
 
-inport = 9990
+inport = 9992
 outport = 9991
 
 # Define Server Socket (receiver)
@@ -26,7 +26,8 @@ sample_rate = 16_000
 CONNECTED = 0
 
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
-
+print(device)
+device = "cpu"
 # Load Model
 pkg = torch.load(MODEL_PATH,map_location=torch.device(device))
 if 'model' in pkg:
@@ -79,38 +80,39 @@ def denoiser_live():
             # VAD_RESULT = denoiser_VAD(frame)
             VAD_RESULT = 1
 
-            if current_time > last_log_time + log_delta:
-                last_log_time = current_time
-                tpf = streamer.time_per_frame * 1000
-                rtf = tpf / stride_ms
-                print(f"time per frame: {tpf:.1f}ms, ", end='')
-                print(f"RTF: {rtf:.1f}")
-                streamer.reset_time_per_frame()
+        #     if current_time > last_log_time + log_delta:
+        #         last_log_time = current_time
+        #         tpf = streamer.time_per_frame * 1000
+        #         rtf = tpf / stride_ms
+        #         print(f"time per frame: {tpf:.1f}ms, ", end='')
+        #         print(f"RTF: {rtf:.1f}")
+        #         streamer.reset_time_per_frame()
 
-            last_log_time = current_time
-            length = streamer.total_length if first else streamer.stride
+        #     last_log_time = current_time
+        #     length = streamer.total_length if first else streamer.stride
 
-            first = False
-            current_time += length / sample_rate
+        #     first = False
+        #     current_time += length / sample_rate
 
             if VAD_RESULT == 1:
-                frame = torch.from_numpy(frame).mean(dim=1).cuda()
-                with torch.no_grad():
-                    out = streamer.feed(frame[None])[0]
+                out = frame
+        #         frame = torch.from_numpy(frame).mean(dim=1).to(device)
+        #         with torch.no_grad():
+        #             out = streamer.feed(frame[None])[0]
 
-                if not out.numel():
-                    continue
-                # compresser
-        #         # out = 0.99 * torch.tanh(out)
+        #         if not out.numel():
+        #             continue
+        #         # compresser
+        # #         # out = 0.99 * torch.tanh(out)
 
-                # TODO:Maybe it is 2 in the repeat
-                # print("check")
-                out = out[:, None].repeat(1,2)
-                mx = out.abs().max().item()
-                if mx > 1:
-                    print("Clipping!!")
-                out.clamp_(-1, 1)
-                out = out.cpu().numpy()
+        #         # TODO:Maybe it is 2 in the repeat
+        #         # print("check")
+        #         out = out[:, None].repeat(1,2)
+        #         mx = out.abs().max().item()
+        #         if mx > 1:
+        #             print("Clipping!!")
+        #         out.clamp_(-1, 1)
+        #         out = out.cpu().numpy()
                 
 
                 if CONNECTED == 0:

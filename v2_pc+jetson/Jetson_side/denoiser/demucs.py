@@ -223,6 +223,7 @@ class DemucsStreamer:
                  resample_buffer=256):
         # device = next(iter(demucs.parameters())).device
         device = th.device('cuda:0' if th.cuda.is_available() else 'cpu')
+        device = "cpu"
         self.demucs = demucs
         self.lstm_state = None
         self.conv_state = None
