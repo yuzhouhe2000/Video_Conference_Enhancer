@@ -77,6 +77,9 @@ if dlib fails to install, try to install from source:
 
     (if assert error happens, delete the lines with the assert(false) statement in the error files)
 
+if OSX has limited the maximum UDP-package to be 9216:
+
+    sudo sysctl -w net.inet.udp.maxdgram=65535
 
 
 
