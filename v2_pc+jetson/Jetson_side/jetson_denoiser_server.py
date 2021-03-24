@@ -7,7 +7,7 @@ import threading
 
 from denoiser.demucs import DemucsStreamer
 from denoiser.utils import deserialize_model
-from denoiser.VAD import denoiser_VAD
+# from denoiser.VAD import denoiser_VAD
 from npsocket import SocketNumpyArray
 
 inport = 9990
