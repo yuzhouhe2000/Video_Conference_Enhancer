@@ -78,7 +78,7 @@ def denoiser_live():
             del(audio_buffer[0])
             # VAD_RESULT = denoiser_VAD(frame)
             VAD_RESULT = 1
-            start = time.time()
+            
             if current_time > last_log_time + log_delta:
                 last_log_time = current_time
                 tpf = streamer.time_per_frame * 1000
@@ -94,12 +94,14 @@ def denoiser_live():
             current_time += length / sample_rate
 
             if VAD_RESULT == 1:
+                start = time.time()
                 out = frame
                 frame = torch.from_numpy(frame).mean(dim=1).to(device)
                 with torch.no_grad():
                     out = streamer.feed(frame[None])[0]
 
                 if not out.numel():
+                    print("pass")
                     continue
                 # compresser
         #         # out = 0.99 * torch.tanh(out)
