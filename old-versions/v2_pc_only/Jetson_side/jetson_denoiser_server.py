@@ -10,7 +10,7 @@ from denoiser.utils import deserialize_model
 # from denoiser.VAD import denoiser_VAD
 from npsocket import SocketNumpyArray
 
-inport = 9992
+inport = 9993
 outport = 9991
 
 # Define Server Socket (receiver)
@@ -68,7 +68,7 @@ def denoiser_live():
     print(f"Ready to process audio, total lag: {streamer.total_length / sr_ms:.1f}ms.")
 
     while True:
-        start = time.time()
+        
         if len(audio_buffer) > 0:
             while len(audio_buffer) > 3:
                 del(audio_buffer[0])
@@ -95,6 +95,7 @@ def denoiser_live():
             current_time += length / sample_rate
 
             if VAD_RESULT == 1:
+                start = time.time()
                 out = frame
                 frame = torch.from_numpy(frame).mean(dim=1).to(device)
                 with torch.no_grad():

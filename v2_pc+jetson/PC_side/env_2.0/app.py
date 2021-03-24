@@ -59,7 +59,7 @@ def denoiser_live():
     
     while (LIVE == 1):
         # TODO: NEED to pass the overflow and underflow information
-        frame, overflow = stream_in.read(256)
+        frame, overflow = stream_in.read(512)
         # print(frame.shape)
         client_denoiser_sender.send_numpy_array(frame)
     
