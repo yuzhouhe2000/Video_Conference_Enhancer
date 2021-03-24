@@ -23,7 +23,7 @@ inport_denoiser = 9991
 CONNECTED = 0
 client_denoiser_receiver = SocketNumpyArray()
 client_denoiser_sender = SocketNumpyArray()
-client_denoiser_sender.initialize_sender('localhost', outport_denoiser)
+client_denoiser_sender.initialize_sender('192.168.1.205', outport_denoiser)
 
 # main page
 @app.route("/", methods=['GET'])

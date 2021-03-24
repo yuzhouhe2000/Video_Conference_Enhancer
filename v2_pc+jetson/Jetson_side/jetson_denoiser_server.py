@@ -114,7 +114,7 @@ def denoiser_live():
                 
 
                 if CONNECTED == 0:
-                    server_denoiser_sender.initialize_sender('localhost', outport)
+                    server_denoiser_sender.initialize_sender('192.168.5.138', outport)
                     server_denoiser_sender.send_numpy_array(out)
                     CONNECTED = 1
                 else:
