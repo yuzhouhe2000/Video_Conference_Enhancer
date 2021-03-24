@@ -21,6 +21,8 @@ TODO:
 
 - [x] Voice Activity Detection using voice
 
+- [X] Server, Client, and UDP
+
 - [ ] Adjust sound volume (mono/bi channel) by speaker position
 
 - [ ] Add extra denoising function using filters
@@ -43,11 +45,22 @@ move "[shape_predictor_68_face_landmarks.dat](https://drive.google.com/file/d/1s
 
     1. pip3 install -r requirements.txt
 
-    2. cd env
+    2. on Jetson:
 
-    3. flask run
+        cd v2_pc+jetson/Jetson_side
+
+        python3 jetson_denoiser_server.py
+
+
+    3. on PC:
+
+        cd v2_pc+jetson/PC_side/env_2.0
+
+        flask run
 
     4. open site in chrome
+
+
 
 
 if dlib fails to install, try to install from source:
