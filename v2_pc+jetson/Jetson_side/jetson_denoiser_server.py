@@ -121,7 +121,7 @@ def denoiser_live():
                 #     CONNECTED = 1
                 # else:
                 #     server_denoiser_sender.send_numpy_array(out)
-                #     print(time.time()-start)
+                print(time.time()-start)
 
 
 
