@@ -10,7 +10,7 @@ from denoiser.utils import deserialize_model
 # from denoiser.VAD import denoiser_VAD
 from npsocket import SocketNumpyArray
 
-inport = 9993
+inport = 9999
 outport = 8080
 
 # Define Server Socket (receiver)
@@ -69,18 +69,16 @@ def denoiser_live():
     print(f"Ready to process audio, total lag: {streamer.total_length / sr_ms:.1f}ms.")
 
     while True:
-        start = time.time()
+        
         if len(audio_buffer) > 0:
-            while len(audio_buffer) > 3:
+            while len(audio_buffer) > 10:
                 del(audio_buffer[0])
             frame = audio_buffer[0]
             print(len(audio_buffer))
             del(audio_buffer[0])
-            print(len(audio_buffer))
-
             # VAD_RESULT = denoiser_VAD(frame)
             VAD_RESULT = 1
-
+            start = time.time()
             if current_time > last_log_time + log_delta:
                 last_log_time = current_time
                 tpf = streamer.time_per_frame * 1000
