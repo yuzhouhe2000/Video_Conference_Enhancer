@@ -51,8 +51,8 @@ class SocketNumpyArray():
         self.port = port
         self.socket.bind((self.address, self.port))
         print('Socket bind complete')
-        # self.socket.listen(10)
-        # self.conn, addr = self.socket.accept()
+        self.socket.listen(10)
+        self.conn, addr = self.socket.accept()
         print('Socket now listening')
         self.payload_size = struct.calcsize("L")  ### CHANGED
         self.data = b''
