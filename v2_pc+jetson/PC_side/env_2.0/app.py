@@ -18,7 +18,7 @@ COUNT = 0
 LIVE = 0
 VAD_RESULT = 0
 
-outport_denoiser = 9990
+outport_denoiser = 9992
 inport_denoiser = 9991
 CONNECTED = 0
 client_denoiser_receiver = SocketNumpyArray()

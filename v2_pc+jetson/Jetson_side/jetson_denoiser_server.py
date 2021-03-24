@@ -28,7 +28,7 @@ CONNECTED = 0
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
 # Load Model
-pkg = torch.load(MODEL_PATH)
+pkg = torch.load(MODEL_PATH,map_location=torch.device(device))
 if 'model' in pkg:
     if 'best_state' in pkg:
         pkg['model']['state'] = pkg['best_state']
