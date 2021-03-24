@@ -19,8 +19,11 @@ CAMERA_CONTROl = 1
 OLD_CAMERA_CONTROl = 1
 VAD_RESULT = 0
 
+outport_denoiser = 9996
+inport_denoiser = 9998
+
 client_denoiser_sender = SocketNumpyArray()
-client_denoiser_sender.initialize_sender('localhost', 9998)
+client_denoiser_sender.initialize_sender('localhost', outport_denoiser)
 
 # main page
 @app.route("/", methods=['GET'])
@@ -65,7 +68,6 @@ def denoiser_live():
 
 @app.route("/output_audio", methods=["POST"])
 def output_audio():
-    print("???")
     CONNECTED = 0
     sample_rate = 16000
     device_out = "Soundflower (2ch)"
@@ -76,13 +78,13 @@ def output_audio():
         samplerate=sample_rate,
         channels=channels_out)
     stream_out.start()
-    print("???")
+
     while True:
-        print("??")
+
         if CONNECTED == 0:
             client_denoiser_receiver = SocketNumpyArray()
-            print("???")
-            client_denoiser_receiver.initialize_receiver(9999)
+
+            client_denoiser_receiver.initialize_receiver(inport_denoiser)
             print("INITIALIZED") 
             CONNECTED = 1  
         else:

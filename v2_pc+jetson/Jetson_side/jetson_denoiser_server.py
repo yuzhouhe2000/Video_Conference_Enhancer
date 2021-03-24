@@ -10,8 +10,8 @@ from denoiser.utils import deserialize_model
 from denoiser.VAD import denoiser_VAD
 from npsocket import SocketNumpyArray
 
-inport = 9998
-outport = 9999
+inport = 9996
+outport = 9998
 
 # Define Server Socket (receiver)
 server_denoiser_receiver = SocketNumpyArray()
@@ -39,7 +39,6 @@ model.eval()
 # Threads
 audio_buffer = []
 threads = []
-
 
 def receive_audio():
     global audio_buffer
@@ -98,17 +97,17 @@ def denoiser_live():
                 with torch.no_grad():
                     out = streamer.feed(frame[None])[0]
 
-                # if not out.numel():
-                #     continue
+                if not out.numel():
+                    continue
                 # compresser
         #         # out = 0.99 * torch.tanh(out)
 
                 # TODO:Maybe it is 2 in the repeat
                 # print("check")
-                # out = out[:, None].repeat(1,1)
-                # mx = out.abs().max().item()
-                # if mx > 1:
-                #     print("Clipping!!")
+                out = out[:, None].repeat(1,2)
+                mx = out.abs().max().item()
+                if mx > 1:
+                    print("Clipping!!")
                 out.clamp_(-1, 1)
                 out = out.cpu().numpy()
                 
