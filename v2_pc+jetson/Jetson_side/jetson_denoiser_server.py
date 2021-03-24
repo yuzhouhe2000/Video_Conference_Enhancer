@@ -94,7 +94,7 @@ def denoiser_live():
             current_time += length / sample_rate
 
             if VAD_RESULT == 1:
-                frame = torch.from_numpy(frame).mean(dim=1).to(device)
+                frame = torch.from_numpy(frame).mean(dim=1).cuda()
                 with torch.no_grad():
                     out = streamer.feed(frame[None])[0]
 

@@ -336,7 +336,6 @@ class DemucsStreamer:
         first = self.conv_state is None
         stride = self.stride * demucs.resample
         x = frame[None]
-        x = x.cuda()
         for idx, encode in enumerate(demucs.encoder):
             stride //= demucs.stride
             length = x.shape[2]
