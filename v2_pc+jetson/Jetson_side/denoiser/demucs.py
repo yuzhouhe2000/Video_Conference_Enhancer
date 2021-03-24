@@ -221,7 +221,8 @@ class DemucsStreamer:
                  num_frames=1,
                  resample_lookahead=64,
                  resample_buffer=256):
-        device = next(iter(demucs.parameters())).device
+        # device = next(iter(demucs.parameters())).device
+        device = "cuda"
         self.demucs = demucs
         self.lstm_state = None
         self.conv_state = None
