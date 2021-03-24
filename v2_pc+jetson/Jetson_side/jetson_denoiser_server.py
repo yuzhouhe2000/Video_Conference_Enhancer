@@ -10,8 +10,8 @@ from denoiser.utils import deserialize_model
 from denoiser.VAD import denoiser_VAD
 from npsocket import SocketNumpyArray
 
-inport = 9996
-outport = 9998
+inport = 9990
+outport = 9991
 
 # Define Server Socket (receiver)
 server_denoiser_receiver = SocketNumpyArray()
@@ -23,6 +23,7 @@ MODEL_PATH = "denoiser/denoiser.th"
 DRY = 0.04
 frame_num = 1
 sample_rate = 16_000
+CONNECTED = 0
 
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
@@ -51,7 +52,7 @@ def receive_audio():
 def denoiser_live():
     global server_denoiser_sender
     global audio_buffer
-    CONNECTED = 0
+    global CONNECTED
     print("denoiser_start")
     first = True
     current_time = 0

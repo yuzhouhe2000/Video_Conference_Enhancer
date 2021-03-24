@@ -6,6 +6,7 @@ import sounddevice as sd
 import cv2
 from npsocket import SocketNumpyArray
 import numpy as np
+from camera_input import video_input 
 
 # Initilize flask app and socketio
 app = Flask(__name__)
@@ -15,13 +16,12 @@ socketio = SocketIO(app)
 DRY = 0.04
 COUNT = 0
 LIVE = 0
-CAMERA_CONTROl = 1
-OLD_CAMERA_CONTROl = 1
 VAD_RESULT = 0
 
-outport_denoiser = 9996
-inport_denoiser = 9998
-
+outport_denoiser = 9990
+inport_denoiser = 9991
+CONNECTED = 0
+client_denoiser_receiver = SocketNumpyArray()
 client_denoiser_sender = SocketNumpyArray()
 client_denoiser_sender.initialize_sender('localhost', outport_denoiser)
 
@@ -68,7 +68,8 @@ def denoiser_live():
 
 @app.route("/output_audio", methods=["POST"])
 def output_audio():
-    CONNECTED = 0
+    global CONNECTED
+    global client_denoiser_receiver
     sample_rate = 16000
     device_out = "Soundflower (2ch)"
     caps = query_devices(device_out, "output")
@@ -80,10 +81,7 @@ def output_audio():
     stream_out.start()
 
     while True:
-
         if CONNECTED == 0:
-            client_denoiser_receiver = SocketNumpyArray()
-
             client_denoiser_receiver.initialize_receiver(inport_denoiser)
             print("INITIALIZED") 
             CONNECTED = 1  
@@ -113,42 +111,62 @@ def control_panel():
     return ('', 204)
 
 
-# # generate frames
-# def gen(camera):
-#     global CAMERA_CONTROl
-#     global OLD_CAMERA_CONTROl
-#     while(1):
-#         if CAMERA_CONTROl == 1:
-#             camera = VideoCamera()
-#             frame = camera.get_frame()
-#             yield (b'--frame\r\n'
-#                 b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
-#         if OLD_CAMERA_CONTROl == 1 and CAMERA_CONTROl == 0:
-#             camera.close()
-#         if OLD_CAMERA_CONTROl == 0 and CAMERA_CONTROl == 0:
-#             time.sleep(0.4)
-#         OLD_CAMERA_CONTROl = CAMERA_CONTROl
-        
-            
-# #　feed video
-@app.route('/video_feed')
-def video_feed():
-    return ('', 204)
 
-#     return Response(gen(VideoCamera()),
-#                         mimetype='multipart/x-mixed-replace; boundary=frame')
+
+
+
+
+
+# --------------------------------------- video part ----------------------------------------------
+
+
+CAMERA_CONTROl = 1
+OLD_CAMERA_CONTROl = 1
+outport_video = 5000
+inport_video = 9999
+first = 0
 
 # # control camera
 @app.route('/camera_control',methods=['POST'])
 def camera_control():
-#     global CAMERA_CONTROl
-#     if CAMERA_CONTROl == 0:
-#         CAMERA_CONTROl = 1
+    global first
+    global CAMERA_CONTROl
+    if first == 0:
+        video_input()
+        first= first+1
+    if CAMERA_CONTROl == 0:
+        CAMERA_CONTROl = 1
         
-#     else:
-#         CAMERA_CONTROl = 0
+    else:
+        CAMERA_CONTROl = 0
     return('', 204)
 
+
+
+# @app.route("/output_video", methods=["POST"])
+# def output_audio():
+#     CONNECTED = 0
+#     while True:
+#         if CONNECTED == 0:
+#             client_denoiser_receiver = SocketNumpyArray()
+
+#             client_denoiser_receiver.initialize_receiver(inport_denoiser)
+#             print("INITIALIZED") 
+#             CONNECTED = 1  
+#         else:
+#             out = client_denoiser_receiver.receive_array()
+#             codec = cv2.VideoWriter_fourcc(*'DIVX')  # for mac OSX, not sure if it works for windows
+#             output = cv2.VideoWriter('video.avi',codec,30,(640, 480))
+#             output.write(frame)
+#     return ('', 204)
+
+
+# # # #　feed video
+@app.route('/video_feed')
+def video_feed():
+    return ('', 204)
+#     return Response(gen(),
+#                         mimetype='multipart/x-mixed-replace; boundary=frame')
 
 
 if __name__ == '__main__':
