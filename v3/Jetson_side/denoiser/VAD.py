@@ -83,31 +83,36 @@ def denoiser_VAD(frame):
     global count
     
     frame = frame.reshape((-1,)) 
+    length = int(len(frame)/FRAME_SIZE)
+    frame_list = frame[0:FRAME_SIZE*length]
     
-    with torch.no_grad():
-        mfcc_feature = python_speech_features.mfcc(frame,SAMPLE_RATE, winstep=(FRAME_SIZE_MS / 1000), 
-                                    winlen= 4 * (FRAME_SIZE_MS / 1000), nfft=2048)
-        mfcc_feature = mfcc_feature[:, 1:]
+    for frame_n in range(0,length):
+        frame = frame_list[frame_n*FRAME_SIZE:(frame_n+1)*FRAME_SIZE]
+        with torch.no_grad():
+            mfcc_feature = python_speech_features.mfcc(frame,SAMPLE_RATE, winstep=(FRAME_SIZE_MS / 1000), 
+                                        winlen= 4 * (FRAME_SIZE_MS / 1000), nfft=2048)
+            mfcc_feature = mfcc_feature[:, 1:]
 
-        mfcc_stream.append(mfcc_feature)
-        if len(mfcc_stream) >= (FRAMES+1):
-            mfcc_stream.pop(0)
-            # print(mfcc_stream[0])
-        count = count + 1
-        if len(mfcc_stream) == FRAMES:
-            if count >= 5:
-    
-                mfcc_stream_array = np.array(mfcc_stream)
-                mfcc_stream_array = mfcc_stream_array.transpose(1,0,2)
-                mfcc_stream_array = mfcc_stream_array.astype(np.float32)
-                test_data_tensor = torch.from_numpy(mfcc_stream_array).to(device)
-                output = model(test_data_tensor).to(device)
-                pred_y = torch.max(output, 1)[1].data.numpy()
-                result = pred_y[0]
-                end = time.time()
-                print(result)
-                count = 0
-            
+            mfcc_stream.append(mfcc_feature)
+            if len(mfcc_stream) >= (FRAMES+1):
+                mfcc_stream.pop(0)
+                # print(mfcc_stream[0])
+            count = count + 1
+            if len(mfcc_stream) == FRAMES:
+                if count >= 2:
+                    mfcc_stream_array = np.array(mfcc_stream)
+                    mfcc_stream_array = mfcc_stream_array.transpose(1,0,2)
+                    mfcc_stream_array = mfcc_stream_array.astype(np.float32)
+                    test_data_tensor = torch.from_numpy(mfcc_stream_array).to(device)
+                    output = model(test_data_tensor).to(device)
+                    pred_y = torch.max(output, 1)[1].data.numpy()
+                    result = pred_y[0]
+                    end = time.time()
+                    print(result)
+                    count = 0
+
+                    if result == 1:
+                        return(result)
     return(result)
 
 

@@ -10,8 +10,8 @@ from denoiser.utils import deserialize_model
 # from denoiser.VAD import denoiser_VAD
 from npsocket import SocketNumpyArray
 
-inport = 9993
-outport = 9991
+inport = 9999
+outport = 8080
 
 # Define Server Socket (receiver)
 server_denoiser_receiver = SocketNumpyArray()
@@ -26,6 +26,7 @@ sample_rate = 16_000
 CONNECTED = 0
 
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+
 print(device)
 
 # Load Model
@@ -36,6 +37,7 @@ if 'model' in pkg:
     model = deserialize_model(pkg['model'])
 else:
     model = deserialize_model(pkg)
+model.cuda('cuda:0')
 model.eval()
 
 # Threads
@@ -47,8 +49,6 @@ def receive_audio():
     while True: 
         frame = server_denoiser_receiver.receive_array()
         audio_buffer.append(frame)
-
-
 
 def denoiser_live():
     global server_denoiser_sender
@@ -70,16 +70,14 @@ def denoiser_live():
     while True:
         
         if len(audio_buffer) > 0:
-            while len(audio_buffer) > 3:
+            while len(audio_buffer) > 10:
                 del(audio_buffer[0])
             frame = audio_buffer[0]
             print(len(audio_buffer))
             del(audio_buffer[0])
-            print(len(audio_buffer))
-
             # VAD_RESULT = denoiser_VAD(frame)
             VAD_RESULT = 1
-
+            
             if current_time > last_log_time + log_delta:
                 last_log_time = current_time
                 tpf = streamer.time_per_frame * 1000
@@ -102,9 +100,10 @@ def denoiser_live():
                     out = streamer.feed(frame[None])[0]
 
                 if not out.numel():
+                    print("pass")
                     continue
                 # compresser
-        #         # out = 0.99 * torch.tanh(out)
+                # out = 0.99 * torch.tanh(out)
 
                 # TODO:Maybe it is 2 in the repeat
                 # print("check")
@@ -116,12 +115,12 @@ def denoiser_live():
                 out = out.cpu().numpy()
                 
 
-                if CONNECTED == 0:
-                    server_denoiser_sender.initialize_sender('127.0.0.1', outport)
-                    CONNECTED = 1
-                else:
-                    server_denoiser_sender.send_numpy_array(out)
-                    print(time.time()-start)
+                # if CONNECTED == 0:
+                #     server_denoiser_sender.initialize_sender('192.168.5.138', outport)
+                #     CONNECTED = 1
+                # else:
+                #     server_denoiser_sender.send_numpy_array(out)
+                print(time.time()-start)
 
 
 
@@ -137,3 +136,7 @@ if __name__ == '__main__':
 
 
 
+
+
+
+# scp -r sanchuu.local@36.7.172.11:/Users/Rain/Desktop/434-project/v2_pc+jetson/PC_side/env_2.0/templates /data/user_yz

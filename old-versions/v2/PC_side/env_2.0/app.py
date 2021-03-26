@@ -19,11 +19,11 @@ LIVE = 0
 VAD_RESULT = 0
 
 outport_denoiser = 9999
-inport_denoiser = 8080
+inport_denoiser = 7002
 CONNECTED = 0
 client_denoiser_receiver = SocketNumpyArray()
 client_denoiser_sender = SocketNumpyArray()
-client_denoiser_sender.initialize_sender('192.168.1.205', outport_denoiser)
+client_denoiser_sender.initialize_sender('10.100.31.67', outport_denoiser)
 
 # main page
 @app.route("/", methods=['GET'])
