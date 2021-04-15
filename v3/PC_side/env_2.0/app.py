@@ -17,7 +17,7 @@ DRY = 0.04
 COUNT = 0
 LIVE = 0
 VAD_RESULT = 0
-
+Denoiser = "OMLSA"
 outport_denoiser = 9991
 inport_denoiser = 9992
 CONNECTED = 0
@@ -43,6 +43,7 @@ def query_devices(device, kind):
 def denoiser_live():
     global VAD_RESULT
     global LIVE
+    global Denoiser
     
     LIVE = 1
     print("live request")
@@ -54,15 +55,14 @@ def denoiser_live():
         device=None,
         samplerate=sample_rate,
         channels=channels_in)
-
     stream_in.start()
-    
     while (LIVE == 1):
-        # TODO: NEED to pass the overflow and underflow information
-        frame, overflow = stream_in.read(2608)
-        # print(frame.shape)
-        client_denoiser_sender.send_numpy_array(frame)
-    
+        if Denoiser == "DL":
+            frame, overflow = stream_in.read(2608)
+            client_denoiser_sender.send_numpy_array(frame)
+        elif Denoiser == "DL":
+            frame, overflow = stream_in.read(128)
+            client_denoiser_sender.send_numpy_array(frame)
     stream_in.stop()
     return ('', 204)
 
@@ -82,7 +82,6 @@ def output_audio():
 
     while True:
         if CONNECTED == 0:
-            print("???")
             client_denoiser_receiver.initialize_receiver(inport_denoiser)
             print("INITIALIZED") 
             CONNECTED = 1  
