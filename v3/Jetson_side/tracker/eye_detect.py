@@ -43,6 +43,7 @@ face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
 eye_cascade = cv2.CascadeClassifier('haarcascade_eye.xml')
 # eye_cascade = cv2.CascadeClassifier('haarcascade_eye_tree_eyeglasses.xml')
 
+# If using jetson, use first line and comment out second line
 # cap = cv2.VideoCapture(gstreamer_pipeline(), cv2.CAP_GSTREAMER)
 cap = cv2.VideoCapture(0)
 

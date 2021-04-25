@@ -13,13 +13,15 @@ from real_time_omlsa.omlsa import *
 
 
 
-inport = 9999
-outport = 9998
+inport = 9990
+outport = 9993
 
 # Define Server Socket (receiver)
 server_denoiser_receiver = SocketNumpyArray()
 server_denoiser_receiver.initialize_receiver(inport)
 server_denoiser_sender = SocketNumpyArray()
+
+# server_parameter_sender = SocketNumpyArray()
 
 # GLOBAL_VARIABLES
 MODEL_PATH = "denoiser/denoiser.th"
@@ -80,7 +82,6 @@ def denoiser_live():
             print(len(audio_buffer))
         
             # if len(frame) == 128:
-
             # Audio_Chain: 
             # First step: VAD
 

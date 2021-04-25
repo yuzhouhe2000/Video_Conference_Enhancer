@@ -13,7 +13,6 @@ var stopLive = document.getElementById("stopLive");
 liveButton.addEventListener("click", startlive);
 stopLive.addEventListener("click", stoplive);
 
-
 function startlive() {
     
     stopLive.disabled = false;
