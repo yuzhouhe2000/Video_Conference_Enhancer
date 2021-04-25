@@ -50,7 +50,7 @@ cap = cv2.VideoCapture(0)
 index = 1
 sum_face = 0
 sum_eye = 0
-window = 100
+window = 10
 
 face_vect = np.zeros(window)
 eye_vect = np.zeros(window)
@@ -60,6 +60,7 @@ eye_check_cnt = 0
 cnt = 0
 face_size= 0
 eye_size = 0
+
 
 while 1:
     ret, img = cap.read()
@@ -83,18 +84,20 @@ while 1:
             if len(eyes) == 2:
                 eye_size = abs(ex - temp)
                 temp = ex
+
             cv2.rectangle(roi_color,(ex,ey),(ex+ew,ey+eh),(0,255,0),2)
 
             #Moving Average Filter for Facial Size
             face_vect[index] = face_size
             sum_face = sum_face + face_size
             face_avg = sum_face/window
+            
 
             #Moving Average Filter for Eye Size
             eye_vect[index] = eye_size
             sum_eye = sum_eye + eye_size
             eye_avg = sum_eye/window
-
+            
             #Increment index and wrap
             index = (index + 1)%window
 
@@ -102,13 +105,14 @@ while 1:
             diff = abs(face_avg - face_check)
             perc = .1*face_avg
             
-            if eye_check_cnt > 100:
+            if eye_check_cnt > 10:
                 if diff > perc:
                     cam_distance = calculateDistance(eye_avg)
                     print(cam_distance)
+                    
 
             cv2.imshow('img',img)
-            if cnt > 100:
+            if cnt > 10:
                 face_check = face_avg
                 cnt = 0
             

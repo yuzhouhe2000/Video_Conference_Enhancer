@@ -3,6 +3,7 @@
   <head>
     <meta charset="UTF-8">
     <title>EE434 Project</title>
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <style>
@@ -12,6 +13,10 @@
         color: rgb(0, 0, 0);
         font-family: Arial, Helvetica, sans-serif;
         
+      }
+
+      input[type=text]:focus {
+        border: 3px solid #555;
       }
 
       button {
@@ -85,10 +90,56 @@
 
 
     <div id="speechTranscriptContainer">
-        <h2 id = "status">Welcome to EE434 Project Demo</h2>
+        <h2 id = "status">Welcome to EE434 Project Demo.</h2>
         <div id="log"></div>
         <div id = "count" num="{{COUNT}}" ></div>
     </div>
+
+
+    <form method="post" id="form">
+      <div style="height: 50px;">
+      <label for="EQ">EQ parameters:</label>
+      <input type="text" name="EQ" id="EQ" placeholder="input 5 parameters for EQ">
+    </div>
+    <div style="height: 50px;">
+      <label for="Denoiser">Denoiser type:</label>
+      <input type="text" name="Denoiser" id="Denoiser" placeholder="DL, DSP, VAD, DL+VAD">
+      
+    </div>
+    <div>
+      <button type="submit">Update Parameters</button>
+    </div>
+  </form>
+
+      <!--Jquery Cdn -->
+      <script src="https://code.jquery.com/jquery-3.5.1.js" 
+      integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc=" 
+      crossorigin="anonymous"></script>
+
+<script type="text/javascript">
+  $(document).on('submit','#form',function(e)
+                 {
+    e.preventDefault();
+    $.ajax({
+      type:'POST',
+      url:'/param',
+      data:{
+        EQ:$("#EQ").val(),
+        Denoiser:$("#Denoiser").val()
+      }
+      
+    })
+    console.log($("#Denoiser").val())
+  });
+</script>
+
+<script>
+  var EQ_input = document.getElementById('EQ');
+  var Denoiser_input = document.getElementById('Denoiser');
+  EQ_input.setAttribute('size',EQ_input.getAttribute('placeholder').length);
+  Denoiser_input.setAttribute('size',Denoiser_input.getAttribute('placeholder').length);
+</script>
+        	 	
 
     <script src="/static/js/app.js"></script>
   </body>

@@ -18,17 +18,26 @@ COUNT = 0
 LIVE = 0
 VAD_RESULT = 0
 Denoiser = "DSP"
-outport_denoiser = 9990
-inport_denoiser = 9993
+outport_denoiser = 9999
+inport_denoiser = 9998
 CONNECTED = 0
 client_denoiser_receiver = SocketNumpyArray()
 client_denoiser_sender = SocketNumpyArray()
 client_denoiser_sender.initialize_sender('127.0.0.1', outport_denoiser)
 
-# main page
-@app.route("/", methods=['GET'])
+
+    
+
+@app.route("/", methods=['GET', 'POST'])
 def index():
     return render_template("index.html")
+
+@app.route('/param', methods=['POST'])
+def parameter():
+    EQ_params = request.form.get("EQ")
+    Denoiser = request.form.get("Denoiser")
+    print(str(EQ_params) + " " + str(Denoiser))
+    return ('', 204)
 
 # sound_device
 def query_devices(device, kind):

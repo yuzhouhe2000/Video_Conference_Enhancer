@@ -13,8 +13,8 @@ from real_time_omlsa.omlsa import *
 
 
 
-inport = 9990
-outport = 9993
+inport = 9999
+outport = 9998
 
 # Define Server Socket (receiver)
 server_denoiser_receiver = SocketNumpyArray()
