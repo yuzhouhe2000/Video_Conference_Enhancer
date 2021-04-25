@@ -178,5 +178,5 @@ def omlsa_streamer(frame,fs,frame_length,frame_move,plot = None,preprocess = Non
         # print(len(frame_out))
         loop_i = loop_i + 1
 
-    # print(time.time()-start)
+    print(time.time()-start)
     return (frame_out[0:frame_move]*0.7)

@@ -29,7 +29,7 @@ device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 print(device)
 
 Audio_VAD_ON = False
-Denoiser = None
+Denoiser = "DL"
 
 # Load Model
 pkg = torch.load(MODEL_PATH,map_location=torch.device(device))
@@ -51,7 +51,6 @@ def receive_audio():
         frame = server_denoiser_receiver.receive_array()
         audio_buffer.append(frame)
 
-def control_panel():
 
 
 
@@ -73,7 +72,6 @@ def denoiser_live():
     print(f"Ready to process audio, total lag: {streamer.total_length / sr_ms:.1f}ms.")
 
     while True:
-
         if len(audio_buffer) > 0:
             while len(audio_buffer) > 10:
                 del(audio_buffer[0])
@@ -81,6 +79,10 @@ def denoiser_live():
             del(audio_buffer[0])
             print(len(audio_buffer))
             
+            
+            # if len(frame) == 128:
+
+
             # Audio_Chain: 
             # First step: VAD
             if Audio_VAD_ON == True: 
@@ -90,6 +92,7 @@ def denoiser_live():
 
             # Audio_Chain:
             if Denoiser == "DL":
+                
                 if current_time > last_log_time + log_delta:
                     last_log_time = current_time
                     tpf = streamer.time_per_frame * 1000
@@ -120,15 +123,15 @@ def denoiser_live():
                         print("Clipping!!")
                     out.clamp_(-1, 1)
                     out = out.cpu().numpy()
-                else:
-                    
-                
-            if CONNECTED == 0:
-                server_denoiser_sender.initialize_sender('127.0.0.1', outport)
-                CONNECTED = 1
-            else:
-                server_denoiser_sender.send_numpy_array(out)
-                print(time.time()-start)
+
+                # else:
+                    if CONNECTED == 0:
+                        print("initialized sender")
+                        server_denoiser_sender.initialize_sender('127.0.0.1', outport)
+                        CONNECTED = 1
+                    else:
+                        server_denoiser_sender.send_numpy_array(out)
+                        print(time.time()-start)
 
 threads.append(threading.Thread(target=receive_audio))
 threads.append(threading.Thread(target=denoiser_live))

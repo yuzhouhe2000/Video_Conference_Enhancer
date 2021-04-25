@@ -17,7 +17,7 @@ DRY = 0.04
 COUNT = 0
 LIVE = 0
 VAD_RESULT = 0
-Denoiser = "OMLSA"
+Denoiser = "DL"
 outport_denoiser = 9991
 inport_denoiser = 9992
 CONNECTED = 0
@@ -60,7 +60,7 @@ def denoiser_live():
         if Denoiser == "DL":
             frame, overflow = stream_in.read(2608)
             client_denoiser_sender.send_numpy_array(frame)
-        elif Denoiser == "DL":
+        elif Denoiser == "DSP":
             frame, overflow = stream_in.read(128)
             client_denoiser_sender.send_numpy_array(frame)
     stream_in.stop()
@@ -110,15 +110,7 @@ def control_panel():
         #return jsonify({'volume': volume})
     return ('', 204)
 
-
-
-
-
-
-
-
 # --------------------------------------- video part ----------------------------------------------
-
 
 CAMERA_CONTROl = 1
 OLD_CAMERA_CONTROl = 1
