@@ -9,9 +9,12 @@ from denoiser.demucs import DemucsStreamer
 from denoiser.utils import deserialize_model
 from denoiser.VAD import denoiser_VAD
 from npsocket import SocketNumpyArray
+from real_time_omlsa.omlsa import *
 
-inport = 9991
-outport = 9992
+
+
+inport = 9999
+outport = 9998
 
 # Define Server Socket (receiver)
 server_denoiser_receiver = SocketNumpyArray()
@@ -29,7 +32,7 @@ device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 print(device)
 
 Audio_VAD_ON = False
-Denoiser = "DL"
+Denoiser = "DSP"
 
 # Load Model
 pkg = torch.load(MODEL_PATH,map_location=torch.device(device))
@@ -50,9 +53,6 @@ def receive_audio():
     while True: 
         frame = server_denoiser_receiver.receive_array()
         audio_buffer.append(frame)
-
-
-
 
 def denoiser_live():
     global server_denoiser_sender
@@ -78,18 +78,17 @@ def denoiser_live():
             frame = audio_buffer[0]
             del(audio_buffer[0])
             print(len(audio_buffer))
-            
-            
+        
             # if len(frame) == 128:
-
 
             # Audio_Chain: 
             # First step: VAD
+
             if Audio_VAD_ON == True: 
                 VAD_RESULT = denoiser_VAD(frame)
             else:
                 VAD_RESULT = 1
-
+            start = time.time()
             # Audio_Chain:
             if Denoiser == "DL":
                 
@@ -108,15 +107,12 @@ def denoiser_live():
                 current_time += length / sample_rate
 
                 if VAD_RESULT == 1:
-                    start = time.time()
                     out = frame
                     frame = torch.from_numpy(frame).mean(dim=1).to(device)
                     with torch.no_grad():
                         out = streamer.feed(frame[None])[0]
-
                     if not out.numel():
                         continue
-
                     out = out[:, None].repeat(1,2)
                     mx = out.abs().max().item()
                     if mx > 1:
@@ -124,14 +120,18 @@ def denoiser_live():
                     out.clamp_(-1, 1)
                     out = out.cpu().numpy()
 
-                # else:
-                    if CONNECTED == 0:
-                        print("initialized sender")
-                        server_denoiser_sender.initialize_sender('127.0.0.1', outport)
-                        CONNECTED = 1
-                    else:
-                        server_denoiser_sender.send_numpy_array(out)
-                        print(time.time()-start)
+            if Denoiser == "DSP":
+                out = omlsa_streamer(frame,sample_rate, frame_length, frame_move,postprocess= "butter",high_cut=6000)
+                out = out.astype(np.float32)
+            
+            if CONNECTED == 0:
+                print("initialized sender")
+                time.sleep(1)
+                server_denoiser_sender.initialize_sender('127.0.0.1', outport)
+                CONNECTED = 1
+            else:
+                server_denoiser_sender.send_numpy_array(out)
+                print(time.time()-start)
 
 threads.append(threading.Thread(target=receive_audio))
 threads.append(threading.Thread(target=denoiser_live))

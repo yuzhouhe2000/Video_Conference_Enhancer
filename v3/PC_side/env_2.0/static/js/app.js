@@ -9,11 +9,10 @@ var audioContext;
 
 var liveButton = document.getElementById("liveButton");
 var stopLive = document.getElementById("stopLive");
-var cameraButton = document.getElementById("cameraButton");
 
 liveButton.addEventListener("click", startlive);
 stopLive.addEventListener("click", stoplive);
-cameraButton.addEventListener("click", cameraon);
+
 
 function startlive() {
     
@@ -52,23 +51,6 @@ function stoplive() {
     xhr.open("POST","/endlive",true);
     xhr.send("fight off!");
     document.getElementById("status").innerHTML = "denoiser off";
-}
-
-function cameraon() {
-    if (document.getElementById("cameraButton").innerHTML == "Camera On"){
-        document.getElementById("cameraButton").innerHTML = "Camera Off"
-    }
-    else{
-        document.getElementById("cameraButton").innerHTML = "Camera On"
-    }
-    var xhr=new XMLHttpRequest();
-        xhr.onload=function(e) {
-            if(this.readyState === 4) {
-                console.log("Server returned: ",e.target.responseText);
-            }
-        };
-    xhr.open("POST","/camera_control",true);
-    xhr.send("switch!");
 }
 
 

@@ -17,9 +17,9 @@ DRY = 0.04
 COUNT = 0
 LIVE = 0
 VAD_RESULT = 0
-Denoiser = "DL"
-outport_denoiser = 9991
-inport_denoiser = 9992
+Denoiser = "DSP"
+outport_denoiser = 9999
+inport_denoiser = 9998
 CONNECTED = 0
 client_denoiser_receiver = SocketNumpyArray()
 client_denoiser_sender = SocketNumpyArray()
@@ -48,9 +48,9 @@ def denoiser_live():
     LIVE = 1
     print("live request")
 
-    sample_rate = 16_000
+    sample_rate = 44100
     caps = query_devices(None, "input")
-    channels_in = min(caps['max_input_channels'], 2)
+    channels_in = min(caps['max_input_channels'], 1)
     stream_in = sd.InputStream(
         device=None,
         samplerate=sample_rate,
@@ -70,10 +70,10 @@ def denoiser_live():
 def output_audio():
     global CONNECTED
     global client_denoiser_receiver
-    sample_rate = 16000
+    sample_rate = 44100
     device_out = "Soundflower (2ch)"
     caps = query_devices(device_out, "output")
-    channels_out = min(caps['max_output_channels'], 2)
+    channels_out = min(caps['max_output_channels'], 1)
     stream_out = sd.OutputStream(
         device=None,
         samplerate=sample_rate,
@@ -87,6 +87,7 @@ def output_audio():
             CONNECTED = 1  
         else:
             out = client_denoiser_receiver.receive_array()
+            # print(out)
             stream_out.write(out)
     stream_out.stop()
     return ('', 204)
@@ -109,56 +110,6 @@ def control_panel():
         DRY = int(volume)/1000
         #return jsonify({'volume': volume})
     return ('', 204)
-
-# --------------------------------------- video part ----------------------------------------------
-
-CAMERA_CONTROl = 1
-OLD_CAMERA_CONTROl = 1
-outport_video = 5000
-inport_video = 9999
-first = 0
-
-# # control camera
-@app.route('/camera_control',methods=['POST'])
-def camera_control():
-    global first
-    global CAMERA_CONTROl
-    if first == 0:
-        video_input()
-        first= first+1
-    if CAMERA_CONTROl == 0:
-        CAMERA_CONTROl = 1
-        
-    else:
-        CAMERA_CONTROl = 0
-    return('', 204)
-
-
-
-# @app.route("/output_video", methods=["POST"])
-# def output_audio():
-#     CONNECTED = 0
-#     while True:
-#         if CONNECTED == 0:
-#             client_denoiser_receiver = SocketNumpyArray()
-
-#             client_denoiser_receiver.initialize_receiver(inport_denoiser)
-#             print("INITIALIZED") 
-#             CONNECTED = 1  
-#         else:
-#             out = client_denoiser_receiver.receive_array()
-#             codec = cv2.VideoWriter_fourcc(*'DIVX')  # for mac OSX, not sure if it works for windows
-#             output = cv2.VideoWriter('video.avi',codec,30,(640, 480))
-#             output.write(frame)
-#     return ('', 204)
-
-
-# # # #　feed video
-@app.route('/video_feed')
-def video_feed():
-    return ('', 204)
-#     return Response(gen(),
-#                         mimetype='multipart/x-mixed-replace; boundary=frame')
 
 
 if __name__ == '__main__':

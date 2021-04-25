@@ -1,7 +1,7 @@
 # Some helper functions
 import numpy as np
 import scipy.special
-# from numba import njit, prange
+from numba import njit, prange
 from scipy.signal import butter, lfilter
 
 
@@ -63,7 +63,7 @@ def find_I_f(N_eff,gamma0,zeta,zeta0,gamma_min):
     return I_f
 
 
-def butter_bandpass_filter(data,lowcut, highcut, fs, zi,order=5):
+def butter_bandpass_filter(data,lowcut, highcut, fs, zi,order=4):
     low = lowcut /(fs/2)
     high = highcut /(fs/2)
     sos = butter(order,high, btype='low',output = 'sos')

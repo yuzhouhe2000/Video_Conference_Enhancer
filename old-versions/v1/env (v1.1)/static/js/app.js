@@ -15,8 +15,6 @@ var liveButton = document.getElementById("liveButton");
 var stopLive = document.getElementById("stopLive");
 var cameraButton = document.getElementById("cameraButton");
 
-
-
 playButton.addEventListener("click", playRecording);  
 recordButton.addEventListener("click", startRecording);
 stopButton.addEventListener("click", stopRecording);

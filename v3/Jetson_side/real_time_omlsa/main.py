@@ -9,6 +9,7 @@ import threading
 import time
 import sys
 
+
 buffer = []
 LIVE = 1
 sample_rate = 44100
@@ -58,8 +59,10 @@ def denoiser_output():
                     del(buffer[0])
                 frame = buffer[0]
                 del(buffer[0])
-                print(len(buffer))
-                output = omlsa_streamer(frame,sample_rate, frame_length, frame_move,preprocess="")
+                # print(len(buffer))
+                start = time.time()
+                output = omlsa_streamer(frame,sample_rate, frame_length, frame_move,postprocess= "butter",high_cut=19000)
+                print(time.time()-start)
                 stream_out.write(output.astype(np.float32))
         while(LIVE == 0):
             if buffer != []:
