@@ -71,7 +71,34 @@ To run the flask server (linux/mac):
 
 Notes:
 
-if OSX limits the maximum UDP-package to be 9216, input the following command in terminal to remove the restriction:
+If you want to test out individual modules:
+
+    Voice Activity Detection:
+
+        cd 434-project/etc/individual\ modules/Voice_Activity_Detection/env
+        
+        flask run
+
+    Real Time OMLSA Algorithm:
+
+        cd 434-project/etc/individual\ modules/real_time_omlsa 
+
+        python3 main.py
+    
+    Non-real time OMLSA Algorithm with file input (can plot the result):
+
+        cd 434-project/etc/individual\ modules/fast_omlsa
+
+        python3 main.py
+
+    Demucs Denoiser (support file upload):
+
+        cd 434-project/etc/v1/env\ \(v1.1\)
+
+        flask run 
+
+
+If OSX limits the maximum UDP-package to be 9216, input the following command in terminal to remove the restriction:
 
     sudo sysctl -w net.inet.udp.maxdgram=65535
 
