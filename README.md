@@ -8,7 +8,9 @@ Team: Michael Pozzi, Matt Baseheart, Yuzhou He
 
 How it works:
 
-    After Audio Client collects Input Frames
+    After Audio Client collects Input Frames 
+    
+    [16k Hz forr speech detection + single channel for speed]
     
         1. If Voice Activity Detected: Client send the audio data to Server through UDP
 
@@ -23,6 +25,18 @@ How it works:
         3. To video based enhancement 
 
         4. Send processed audio back to Client through UDP
+
+    Video Module (works separately from flask app):
+
+        1. Detect and mark face 
+
+        2. Detect Eyes and measure eye separations (support glasses). Using moving average filter for stable output.
+
+        3. Estimate distance using eye separation and focal length
+
+        4. Send distance information to Audio Server
+
+        5. Send position information to Pan-Tilt Camera / digital zoom
 
 To run the flask server (linux/mac):
 
