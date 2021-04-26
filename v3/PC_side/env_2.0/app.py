@@ -7,26 +7,27 @@ import cv2
 from npsocket import SocketNumpyArray
 import numpy as np
 from camera_input import video_input 
+import socket
+
 
 # Initilize flask app and socketio
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
 socketio = SocketIO(app)
 
-DRY = 0.04
+MIX = 40
 COUNT = 0
 LIVE = 0
 VAD_RESULT = 0
 Denoiser = "DSP"
-outport_denoiser = 9999
-inport_denoiser = 9998
+outport_denoiser = 9990
+inport_denoiser = 9991
+outport_parameter = 9992
 CONNECTED = 0
 client_denoiser_receiver = SocketNumpyArray()
 client_denoiser_sender = SocketNumpyArray()
 client_denoiser_sender.initialize_sender('127.0.0.1', outport_denoiser)
-
-
-    
+client_parameter_sender = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
 @app.route("/", methods=['GET', 'POST'])
 def index():
@@ -36,7 +37,10 @@ def index():
 def parameter():
     EQ_params = request.form.get("EQ")
     Denoiser = request.form.get("Denoiser")
-    print(str(EQ_params) + " " + str(Denoiser))
+    parameters = {"EQ": EQ_params, "Denoiser": Denoiser, "MIX": MIX}
+    parameters_json = json.dumps(parameters).encode('utf-8')
+    client_parameter_sender.sendto(parameters_json, ("127.0.0.1", outport_parameter))
+    print(parameters_json)
     return ('', 204)
 
 # sound_device
@@ -112,12 +116,10 @@ def end_live():
 
 @app.route('/slide', methods=['GET', 'POST'])
 def control_panel():
-    global DRY
+    global MIX
     if request.method == 'POST':
-        volume = request.form.get('slide')
-        print('volume:', volume)
-        DRY = int(volume)/1000
-        #return jsonify({'volume': volume})
+        MIX = request.form.get('slide')
+        print('MIX changed to:', MIX)
     return ('', 204)
 
 

@@ -10,14 +10,19 @@ from denoiser.utils import deserialize_model
 from denoiser.VAD import denoiser_VAD
 from npsocket import SocketNumpyArray
 from real_time_omlsa.omlsa import *
+import json
 
 
+inport = 9990
+outport = 9991
+parameter_port = 9992
 
-inport = 9999
-outport = 9998
+server_parameter_receiver = socket.socket(socket.AF_INET,socket.SOCK_DGRAM) 
+server_parameter_receiver.bind(("127.0.0.1",parameter_port))
 
 # Define Server Socket (receiver)
 server_denoiser_receiver = SocketNumpyArray()
+
 server_denoiser_receiver.initialize_receiver(inport)
 server_denoiser_sender = SocketNumpyArray()
 
@@ -49,6 +54,15 @@ model.eval()
 # Threads
 audio_buffer = []
 threads = []
+
+def receive_parameter():
+    while True:
+        recieved = server_parameter_receiver.recvfrom(1024)
+        json_obj = json.loads(recieved[0].decode('utf-8'))
+        MIX = json_obj.get("MIX")
+        Denoiser = json_obj.get("Denoiser")
+        EQ_params = json_obj.get("EQ")
+        print(MIX + " " + Denoiser  + " " + EQ_params) 
 
 def receive_audio():
     global audio_buffer
@@ -136,6 +150,7 @@ def denoiser_live():
 
 threads.append(threading.Thread(target=receive_audio))
 threads.append(threading.Thread(target=denoiser_live))
+threads.append(threading.Thread(target=receive_parameter))
 print(threads)
 
 if __name__ == '__main__':
