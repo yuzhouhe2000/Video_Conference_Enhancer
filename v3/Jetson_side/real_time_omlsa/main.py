@@ -1,5 +1,5 @@
 from scipy.io.wavfile import read
-from omlsa import *
+from real_time_omlsa.omlsa import *
 from scipy.io.wavfile import write
 import numpy as np
 import matplotlib.pyplot as plt
