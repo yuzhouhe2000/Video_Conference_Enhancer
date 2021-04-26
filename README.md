@@ -100,11 +100,29 @@ If you want to test out individual modules:
         flask run 
 
 
+Common Errors and Warnings:
+
 If OSX limits the maximum UDP-package to be 9216, input the following command in terminal to remove the restriction:
 
     sudo sysctl -w net.inet.udp.maxdgram=65535
 
 
+If dlib fails to install, try to install from source (the following code works for OSX)):
+
+    git clone https://github.com/davisking/dlib.git
+
+    cd dlib
+
+    mkdir build; cd build; cmake ..; cmake --build .
+
+    cd ..
+
+    python3 setup.py install
+
+    (if assert error happens, delete the lines with the assert(false) statement in the error files)
+    
 
 
+If there is an error that says "the selected port is already binded" or anything similar:
 
+    Go to main.py in Audio_Server and app.py in Audio_Client, change all the port from 9999-9996 to any other port in 9000-9999 range. This error is because the UDP receiver is closed before sender. You should always open UDP receiver first, and close UDP sender first. (which means run Server main.py file before Client flask run, and close Client window before server when quit the program.)
