@@ -20,15 +20,20 @@ MIX = 40
 COUNT = 0
 LIVE = 0
 VAD_RESULT = 0
+volume = 1
 Denoiser = "DSP"
-outport_denoiser = 9990
-inport_denoiser = 9991
-outport_parameter = 9992
+outport_denoiser = 9999
+inport_denoiser = 9998
+outport_parameter = 9997
+video_port = 9996
 CONNECTED = 0
 client_denoiser_receiver = SocketNumpyArray()
 client_denoiser_sender = SocketNumpyArray()
 client_denoiser_sender.initialize_sender('127.0.0.1', outport_denoiser)
 client_parameter_sender = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+server_video_receiver = socket.socket(socket.AF_INET,socket.SOCK_DGRAM) 
+server_video_receiver.bind(("127.0.0.1",video_port))
+
 
 @app.route("/", methods=['GET', 'POST'])
 def index():
@@ -43,7 +48,7 @@ def parameter():
     parameters = {"EQ": EQ_params, "Denoiser": Denoiser, "MIX": MIX}
     parameters_json = json.dumps(parameters).encode('utf-8')
     client_parameter_sender.sendto(parameters_json, ("127.0.0.1", outport_parameter))
-    print(parameters_json)
+    # print(parameters_json)
     return ('', 204)
 
 # sound_device
@@ -78,10 +83,10 @@ def denoiser_live():
         #     client_denoiser_sender.send_numpy_array(frame)
         # elif Denoiser == "DSP":
         frame, overflow = stream_in.read(128)
-        print(Denoiser)
+        # print(Denoiser)
         if "VAD" in Denoiser:
             result = denoiser_VAD(frame)
-            print(result)
+            # print(result)
             if result == 1:
                 client_denoiser_sender.send_numpy_array(frame)
 
@@ -94,6 +99,7 @@ def denoiser_live():
 def output_audio():
     global CONNECTED
     global client_denoiser_receiver
+    global volume
     sample_rate = 16000
     device_out = "Soundflower (2ch)"
     caps = query_devices(device_out, "output")
@@ -113,7 +119,8 @@ def output_audio():
             out = client_denoiser_receiver.receive_array()
             # print(out)
             # print(out.shape)
-            stream_out.write(out)
+            print(volume)
+            stream_out.write(out*volume)
     stream_out.stop()
     return ('', 204)
 
@@ -123,6 +130,19 @@ def end_live():
     global LIVE
     LIVE = 0
     socketio.emit('my_response',{'data': ""})
+    return ('', 204)
+
+
+
+@app.route("/volume", methods=['POST'])
+def receive_video_parameter():
+    global volume
+    time.sleep(1)
+    while LIVE == 1:
+        print("connecting to video server")
+        recieved = server_video_receiver.recvfrom(1024)
+        json_obj = json.loads(recieved[0].decode('utf-8'))
+        volume = json_obj.get("volume")
     return ('', 204)
 
 

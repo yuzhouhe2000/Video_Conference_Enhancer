@@ -12,16 +12,15 @@ from real_time_omlsa.omlsa import *
 import json
 
 
-inport = 9990
-outport = 9991
-parameter_port = 9992
+inport = 9999
+outport = 9998
+parameter_port = 9997
 
 server_parameter_receiver = socket.socket(socket.AF_INET,socket.SOCK_DGRAM) 
 server_parameter_receiver.bind(("127.0.0.1",parameter_port))
 
 # Define Server Socket (receiver)
 server_denoiser_receiver = SocketNumpyArray()
-
 server_denoiser_receiver.initialize_receiver(inport)
 server_denoiser_sender = SocketNumpyArray()
 
@@ -58,8 +57,10 @@ MIX = 40
 Denoiser = "DSP"
 EQ_params = 0
 
-def receive_parameter():
-    global MIX,Denoiser,EQ_params
+
+
+def receive_audio_parameter():
+    global MIX,Denoiser,EQ_params,audio_buffer
     
     while True:
         recieved = server_parameter_receiver.recvfrom(1024)
@@ -67,7 +68,7 @@ def receive_parameter():
         MIX = json_obj.get("MIX")
         Denoiser = json_obj.get("Denoiser")
         EQ_params = json_obj.get("EQ")
-        audio_buffer = []
+        # audio_buffer = []
         print(str(MIX) + " " + str(Denoiser)  + " " + str(EQ_params))
 
 def receive_audio():
@@ -104,6 +105,7 @@ def denoiser_live():
                 if len(audio_buffer)>=FRAME_LENGTH:
                     frame = audio_buffer[0:FRAME_LENGTH]
                     del(audio_buffer[0:FRAME_LENGTH])
+
                     frame = np.concatenate(frame)
                     
                     if current_time > last_log_time + log_delta:
@@ -136,41 +138,44 @@ def denoiser_live():
 
 
             elif "DSP" in Denoiser:
-                while len(audio_buffer) > 10:
-                    del(audio_buffer[0:FRAME_LENGTH])            
+                while len(audio_buffer) > 20:
+                    del(audio_buffer[0])            
                     print("Processing speed is too slow. Switch to DSP denoiser or remove denoiser")
-                frame = audio_buffer[0]
-                del(audio_buffer[0])
-                out = omlsa_streamer(frame,sample_rate, frame_length, frame_move,postprocess= "butter",high_cut=6000)
-                out = out.astype(np.float32)   
-                if CONNECTED == 0:
-                    print("initialized sender")
-                    time.sleep(1)
-                    server_denoiser_sender.initialize_sender('127.0.0.1', outport)
-                    CONNECTED = 1
-                else:
-                    server_denoiser_sender.send_numpy_array(out)
-                    # print(time.time()-start) 
+                if len(audio_buffer) > 0:
+                    frame = audio_buffer[0]
+                    del(audio_buffer[0])
+                    out = omlsa_streamer(frame,sample_rate, frame_length, frame_move,postprocess= "butter",high_cut=6000)
+                    out = out.astype(np.float32)   
+                    if CONNECTED == 0:
+                        print("initialized sender")
+                        time.sleep(1)
+                        server_denoiser_sender.initialize_sender('127.0.0.1', outport)
+                        CONNECTED = 1
+                    else:
+                        server_denoiser_sender.send_numpy_array(out)
+                        # print(time.time()-start) 
 
             else:
                 while len(audio_buffer) > 10:
-                    del(audio_buffer[0:FRAME_LENGTH])  
-                frame = audio_buffer[0]
-                del(audio_buffer[0])
-                out = frame
+                    del(audio_buffer[0:FRAME_LENGTH]) 
+                if len(audio_buffer) > 0: 
+                    frame = audio_buffer[0]
+                    del(audio_buffer[0])
+                    out = frame
 
-                if CONNECTED == 0:
-                    print("initialized sender")
-                    time.sleep(1)
-                    server_denoiser_sender.initialize_sender('127.0.0.1', outport)
-                    CONNECTED = 1
-                else:
-                    server_denoiser_sender.send_numpy_array(out)
-                    # print(time.time()-start)
+                    if CONNECTED == 0:
+                        print("initialized sender")
+                        time.sleep(1)
+                        server_denoiser_sender.initialize_sender('127.0.0.1', outport)
+                        CONNECTED = 1
+                    else:
+                        server_denoiser_sender.send_numpy_array(out)
+                        # print(time.time()-start)
 
 threads.append(threading.Thread(target=receive_audio))
 threads.append(threading.Thread(target=denoiser_live))
-threads.append(threading.Thread(target=receive_parameter))
+threads.append(threading.Thread(target=receive_audio_parameter))
+
 print(threads)
 
 if __name__ == '__main__':

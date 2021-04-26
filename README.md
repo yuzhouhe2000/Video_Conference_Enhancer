@@ -64,7 +64,7 @@ Move "[denoiser.th](https://drive.google.com/file/d/17WuFlrUMJZdYiYEqvBfq4hmAd3x
 
         cd 434-project/Processor/Video
         
-        python3 eye_detect.py
+        python3 dlib_distance_detector.py
 
     5. open flask site in chrome "http://127.0.0.1:5000/")
 

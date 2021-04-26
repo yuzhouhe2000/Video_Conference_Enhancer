@@ -8,8 +8,14 @@ Created on Thu Aug 16 22:20:37 2018
 import dlib
 import cv2
 import numpy as np
+import socket
+import json
 
- 
+video_port = 9996
+
+client_video_sender = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+
 def landmarks_to_np(landmarks, dtype="int"):
     # 获取landmarks的数量
     num = landmarks.num_parts
@@ -95,7 +101,19 @@ while(cap.isOpened()):
         
         Distance = np.sqrt(abs(RIGHT_EYE_CENTER[0] - LEFT_EYE_CENTER[0])^2 + abs(RIGHT_EYE_CENTER[1] - LEFT_EYE_CENTER[1])^2)
 
-        print(Distance)
+        volume = Distance/10.0
+   
+        volume = (2.2 - volume)
+
+        if volume >= 1.5:
+            voume = 1.5
+        if volume <= 0.5:
+            volume = 0.5
+        
+        parameters = {"volume": volume}
+    
+        parameters_json = json.dumps(parameters).encode('utf-8')
+        client_video_sender.sendto(parameters_json, ("127.0.0.1", video_port))
         
     
     # 显示结果
