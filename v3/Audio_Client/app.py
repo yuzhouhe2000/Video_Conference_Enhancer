@@ -8,6 +8,8 @@ from npsocket import SocketNumpyArray
 import numpy as np
 import socket
 
+from VAD import denoiser_VAD
+
 
 # Initilize flask app and socketio
 app = Flask(__name__)
@@ -19,9 +21,9 @@ COUNT = 0
 LIVE = 0
 VAD_RESULT = 0
 Denoiser = "DSP"
-outport_denoiser = 9999
-inport_denoiser = 9998
-outport_parameter = 9997
+outport_denoiser = 9990
+inport_denoiser = 9991
+outport_parameter = 9992
 CONNECTED = 0
 client_denoiser_receiver = SocketNumpyArray()
 client_denoiser_sender = SocketNumpyArray()
@@ -34,6 +36,8 @@ def index():
 
 @app.route('/param', methods=['POST'])
 def parameter():
+    global Denoiser
+
     EQ_params = request.form.get("EQ")
     Denoiser = request.form.get("Denoiser")
     parameters = {"EQ": EQ_params, "Denoiser": Denoiser, "MIX": MIX}
@@ -74,7 +78,15 @@ def denoiser_live():
         #     client_denoiser_sender.send_numpy_array(frame)
         # elif Denoiser == "DSP":
         frame, overflow = stream_in.read(128)
-        client_denoiser_sender.send_numpy_array(frame)
+        print(Denoiser)
+        if "VAD" in Denoiser:
+            result = denoiser_VAD(frame)
+            print(result)
+            if result == 1:
+                client_denoiser_sender.send_numpy_array(frame)
+
+        else:
+            client_denoiser_sender.send_numpy_array(frame)
     stream_in.stop()
     return ('', 204)
 

@@ -7,15 +7,14 @@ import threading
 
 from denoiser.demucs import DemucsStreamer
 from denoiser.utils import deserialize_model
-from denoiser.VAD import denoiser_VAD
 from npsocket import SocketNumpyArray
 from real_time_omlsa.omlsa import *
 import json
 
 
-inport = 9999
-outport = 9998
-parameter_port = 9997
+inport = 9990
+outport = 9991
+parameter_port = 9992
 
 server_parameter_receiver = socket.socket(socket.AF_INET,socket.SOCK_DGRAM) 
 server_parameter_receiver.bind(("127.0.0.1",parameter_port))
@@ -85,7 +84,7 @@ def denoiser_live():
     first = True
     current_time = 0
     last_log_time = 0
-    FRAME_LENGTH = 25
+    FRAME_LENGTH = 20
 
     log_delta = 10
     sr_ms = sample_rate / 1000
@@ -106,10 +105,6 @@ def denoiser_live():
                     frame = audio_buffer[0:FRAME_LENGTH]
                     del(audio_buffer[0:FRAME_LENGTH])
                     frame = np.concatenate(frame)
-                    if "VAD" in Denoiser: 
-                        VAD_RESULT = denoiser_VAD(frame)
-                    else:
-                        VAD_RESULT = 1
                     
                     if current_time > last_log_time + log_delta:
                         last_log_time = current_time
@@ -121,25 +116,23 @@ def denoiser_live():
                     first = False
                     current_time += length / sample_rate
 
-                    if VAD_RESULT == 1:
-                        out = frame
-                        frame = torch.from_numpy(frame).mean(dim=1).to(device)
-                        with torch.no_grad():
-                            out = streamer.feed(frame[None])[0]
-                        if not out.numel():
-                            continue
-                    
-                        mx = out.abs().max().item()
-                        out.clamp_(-1, 1)
-                        out = out.cpu().numpy()
-                        if CONNECTED == 0:
-                            print("initialized sender")
-                            time.sleep(1)
-                            server_denoiser_sender.initialize_sender('127.0.0.1', outport)
-                            CONNECTED = 1
-                        else:
-                            server_denoiser_sender.send_numpy_array(out)
-                            # print(time.time()-start) 
+                    out = frame
+                    frame = torch.from_numpy(frame).mean(dim=1).to(device)
+                    with torch.no_grad():
+                        out = streamer.feed(frame[None])[0]
+                    if not out.numel():
+                        continue
+                
+                    out.clamp_(-1, 1)
+                    out = out.cpu().numpy()
+                    if CONNECTED == 0:
+                        print("initialized sender")
+                        time.sleep(1)
+                        server_denoiser_sender.initialize_sender('127.0.0.1', outport)
+                        CONNECTED = 1
+                    else:
+                        server_denoiser_sender.send_numpy_array(out)
+                        # print(time.time()-start) 
 
 
             elif "DSP" in Denoiser:

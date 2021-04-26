@@ -74,7 +74,7 @@ RESULT = ""
 mfcc_stream = []
 count = 0
 result = -1
-model.load_state_dict(torch.load("denoiser/lstm.net",map_location=torch.device(device)))
+model.load_state_dict(torch.load("lstm.net",map_location=torch.device(device)))
 model.eval()
 
 def denoiser_VAD(frame):
