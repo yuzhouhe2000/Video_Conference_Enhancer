@@ -20,9 +20,9 @@ COUNT = 0
 LIVE = 0
 VAD_RESULT = 0
 Denoiser = "DSP"
-outport_denoiser = 9990
-inport_denoiser = 9991
-outport_parameter = 9992
+outport_denoiser = 9999
+inport_denoiser = 9998
+outport_parameter = 9997
 CONNECTED = 0
 client_denoiser_receiver = SocketNumpyArray()
 client_denoiser_sender = SocketNumpyArray()
@@ -61,7 +61,7 @@ def denoiser_live():
     LIVE = 1
     print("live request")
 
-    sample_rate = 44100
+    sample_rate = 16000
     caps = query_devices(None, "input")
     channels_in = min(caps['max_input_channels'], 1)
     stream_in = sd.InputStream(
@@ -70,12 +70,12 @@ def denoiser_live():
         channels=channels_in)
     stream_in.start()
     while (LIVE == 1):
-        if Denoiser == "DL":
-            frame, overflow = stream_in.read(2608)
-            client_denoiser_sender.send_numpy_array(frame)
-        elif Denoiser == "DSP":
-            frame, overflow = stream_in.read(128)
-            client_denoiser_sender.send_numpy_array(frame)
+        # if Denoiser == "DL":
+        #     frame, overflow = stream_in.read(2)
+        #     client_denoiser_sender.send_numpy_array(frame)
+        # elif Denoiser == "DSP":
+        frame, overflow = stream_in.read(128)
+        client_denoiser_sender.send_numpy_array(frame)
     stream_in.stop()
     return ('', 204)
 
@@ -83,7 +83,7 @@ def denoiser_live():
 def output_audio():
     global CONNECTED
     global client_denoiser_receiver
-    sample_rate = 44100
+    sample_rate = 16000
     device_out = "Soundflower (2ch)"
     caps = query_devices(device_out, "output")
     channels_out = min(caps['max_output_channels'], 1)
@@ -101,6 +101,7 @@ def output_audio():
         else:
             out = client_denoiser_receiver.receive_array()
             # print(out)
+            print(out.shape)
             stream_out.write(out)
     stream_out.stop()
     return ('', 204)
