@@ -7,3 +7,5 @@ torch==1.5.1
 opencv-python
 torchvision==0.8.1
 librosa==0.8.0
+scipy
+

@@ -1,7 +1,6 @@
 # Some helper functions
 import numpy as np
 import scipy.special
-from numba import njit, prange
 from scipy.signal import butter, lfilter
 
 

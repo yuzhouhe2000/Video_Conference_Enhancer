@@ -1,16 +1,11 @@
 import torch
 from torch import nn
-import os
-import math
-import sys
 import numpy as np
 import python_speech_features
-import array
-from torch.nn import Linear, RNN, LSTM, GRU
+from torch.nn import Linear, RNN, LSTM
 import torch.nn.functional as F
 from torch.nn.functional import softmax, relu
 from torch.autograd import Variable
-import pyaudio
 import numpy
 import time
 
