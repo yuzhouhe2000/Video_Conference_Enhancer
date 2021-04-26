@@ -39,7 +39,6 @@ device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 print(device)
 
 Audio_VAD_ON = False
-Denoiser = "DSP"
 
 # Load Model
 pkg = torch.load(MODEL_PATH,map_location=torch.device(device))
@@ -55,7 +54,15 @@ model.eval()
 audio_buffer = []
 threads = []
 
+
+
+MIX = 40
+Denoiser = "DSP"
+EQ_params = 0
+
 def receive_parameter():
+    global MIX,Denoiser,EQ_params
+    
     while True:
         recieved = server_parameter_receiver.recvfrom(1024)
         json_obj = json.loads(recieved[0].decode('utf-8'))
