@@ -1,4 +1,4 @@
-# EE434 Project Updating 
+# EE434 Project Update
 
 A software that receive audio & video input and enhance them in real time. Possible application: meeting (using feedback loop in apps like Zoom) and speech/lecture recording/streaming. The software will denoise the received audio, adjust EQ and enhance the audio performance based on video infomation.
 
