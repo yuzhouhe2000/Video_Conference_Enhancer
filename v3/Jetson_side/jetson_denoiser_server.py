@@ -85,8 +85,8 @@ def denoiser_live():
     first = True
     current_time = 0
     last_log_time = 0
-    last_error_time = 0
-    cooldown_time = 2
+    FRAME_LENGTH = 25
+
     log_delta = 10
     sr_ms = sample_rate / 1000
     streamer = DemucsStreamer(model, dry=DRY, num_frames=frame_num)
@@ -94,27 +94,20 @@ def denoiser_live():
 
     while True:
         if len(audio_buffer) > 0:
-            while len(audio_buffer) > 100:
-                del(audio_buffer[0:20])
-                
-                # print("Processing speed is too slow. Switch to DSP denoiser or remove denoiser")
+            while len(audio_buffer) > FRAME_LENGTH*5:
+                del(audio_buffer[0:FRAME_LENGTH])            
+                print("Processing speed is too slow. Switch to DSP denoiser or remove denoiser")
             
-        
-            # if len(frame) == 128:
-            # Audio_Chain: 
-            # First step: VAD
+    
 
             
             start = time.time()
-            # Audio_Chain:
+
             if "DL" in Denoiser:
-                if len(audio_buffer)>=20:
-                    frame = audio_buffer[0:20]
-                    del(audio_buffer[0:20])
-                    print(len(audio_buffer))
-                    # print(frame.shape)
+                if len(audio_buffer)>=FRAME_LENGTH:
+                    frame = audio_buffer[0:FRAME_LENGTH]
+                    del(audio_buffer[0:FRAME_LENGTH])
                     frame = np.concatenate(frame)
-                    print(frame.shape)
                     if "VAD" in Denoiser: 
                         VAD_RESULT = denoiser_VAD(frame)
                     else:
@@ -122,8 +115,6 @@ def denoiser_live():
                     
                     if current_time > last_log_time + log_delta:
                         last_log_time = current_time
-                        tpf = streamer.time_per_frame * 1000
-                        rtf = tpf / stride_ms
                         streamer.reset_time_per_frame()
 
                     last_log_time = current_time
