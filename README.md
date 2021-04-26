@@ -42,7 +42,9 @@ Note: [two denoisers are included, one based on Demucs network ("DL"), one based
 
 To run the flask server (linux/mac):
 
-0. Download "denoiser.th" from drive. Move "[denoiser.th](https://drive.google.com/file/d/17WuFlrUMJZdYiYEqvBfq4hmAd3x_NwDm/view?usp=sharing)" to 434-project/Processor/Audio_Server/denoiser/denoiser.th
+Download "denoiser.th" from drive. 
+
+Move "[denoiser.th](https://drive.google.com/file/d/17WuFlrUMJZdYiYEqvBfq4hmAd3x_NwDm/view?usp=sharing)" to 434-project/Processor/Audio_Server/denoiser/denoiser.th
 
     1. pip3 install -r requirements.txt
 
