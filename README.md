@@ -4,6 +4,8 @@ A software that receive audio & video input and enhance them in real time. Possi
 
 Team: Michael Pozzi, Matt Baseheart, Yuzhou He
 
+![Flask App](example.jpeg)
+
 How it works:
 
     After Audio Client collects Input Frames
