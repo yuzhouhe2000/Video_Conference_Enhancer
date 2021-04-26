@@ -28,6 +28,8 @@ function startlive() {
     xhr.send("fight on!");
     xhr.open("POST","/volume",true);
     xhr.send("fight on!");
+    xhr.open("POST","/VAD",true);
+    xhr.send("fight on!");
     
     var xhr=new XMLHttpRequest();
     xhr.onload=function(e) {

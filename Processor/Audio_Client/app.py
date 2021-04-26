@@ -22,6 +22,7 @@ LIVE = 0
 VAD_RESULT = 0
 volume = 1
 Denoiser = "DSP"
+buffer = []
 outport_denoiser = 9999
 inport_denoiser = 9998
 outport_parameter = 9997
@@ -65,6 +66,7 @@ def denoiser_live():
     global VAD_RESULT
     global LIVE
     global Denoiser
+    global buffer
     
     LIVE = 1
     print("live request")
@@ -83,15 +85,17 @@ def denoiser_live():
         #     client_denoiser_sender.send_numpy_array(frame)
         # elif Denoiser == "DSP":
         frame, overflow = stream_in.read(128)
+        buffer.append(frame)
+        # print(len(buffer))
         # print(Denoiser)
         if "VAD" in Denoiser:
-            result = denoiser_VAD(frame)
             # print(result)
-            if result == 1:
+            if VAD_RESULT == 1:
                 client_denoiser_sender.send_numpy_array(frame)
-
+            
         else:
             client_denoiser_sender.send_numpy_array(frame)
+
     stream_in.stop()
     return ('', 204)
 
@@ -117,9 +121,6 @@ def output_audio():
             CONNECTED = 1  
         else:
             out = client_denoiser_receiver.receive_array()
-            # print(out)
-            # print(out.shape)
-            print(volume)
             stream_out.write(out*volume)
     stream_out.stop()
     return ('', 204)
@@ -145,6 +146,29 @@ def receive_video_parameter():
         volume = json_obj.get("volume")
     return ('', 204)
 
+@app.route("/VAD", methods=['POST'])
+def VAD():
+    global VAD_RESULT
+    global buffer
+    global Denoiser
+    global LIVE
+    time.sleep(1)
+
+    while LIVE == 1:
+        if "VAD" in Denoiser:
+            # print(len(buffer))
+            # print(len(buffer))
+            while len(buffer) >= 20:
+                del(buffer[0])            
+            if len(buffer) > 0:
+                frame = buffer[0] 
+                # print(frame)
+                del(buffer[0])
+                VAD_RESULT = denoiser_VAD(frame)
+            # print(VAD_RESULT)
+        else:
+            time.sleep(1)
+    return ('', 204)
 
 @app.route('/slide', methods=['GET', 'POST'])
 def control_panel():

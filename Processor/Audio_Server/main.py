@@ -36,7 +36,6 @@ CONNECTED = 0
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 print(device)
 
-Audio_VAD_ON = False
 
 # Load Model
 pkg = torch.load(MODEL_PATH,map_location=torch.device(device))
@@ -129,7 +128,7 @@ def denoiser_live():
                     out = out.cpu().numpy()
                     if CONNECTED == 0:
                         print("initialized sender")
-                        time.sleep(1)
+                        time.sleep(2)
                         server_denoiser_sender.initialize_sender('127.0.0.1', outport)
                         CONNECTED = 1
                     else:

@@ -18,7 +18,6 @@ learning_rate = 0.001
 LIVE = 1
 SAMPLE_RATE = 16000
 SAMPLE_CHANNELS = 1
-SAMPLE_WIDTH = 2
 BATCH_SIZE = 1
 # Frame size to use for the labelling.
 FRAME_SIZE_MS = 30
@@ -62,27 +61,44 @@ class Net(nn.Module):
         return self.softmax(x)
 
 model = Net()
-print(model)
+# print(model)
             
 RESULT = ""
 
 mfcc_stream = []
+VAD_buffer = []
 count = 0
 result = -1
 model.load_state_dict(torch.load("lstm.net",map_location=torch.device(device)))
 model.eval()
+result_buffer = []
 
 def denoiser_VAD(frame):
     global result
     global mfcc_stream
     global count
+    global VAD_buffer
+    global result_buffer
+    length = 1
     
-    frame = frame.reshape((-1,)) 
-    length = int(len(frame)/FRAME_SIZE)
-    frame_list = frame[0:FRAME_SIZE*length]
     
+    # frame = frame.reshape((-1,)) 
+    if len(frame) >= FRAME_SIZE:
+        length = int(len(frame)/FRAME_SIZE)
+        frame_list = frame[0:FRAME_SIZE*length]
+    else:
+        VAD_buffer.append(frame)
+        if len(VAD_buffer)*len(frame) >= FRAME_SIZE:
+            frame_list = np.concatenate(VAD_buffer)
+            VAD_buffer = [] 
+            length = 1
+        else:
+            return result
+
+
     for frame_n in range(0,length):
         frame = frame_list[frame_n*FRAME_SIZE:(frame_n+1)*FRAME_SIZE]
+       
         with torch.no_grad():
             mfcc_feature = python_speech_features.mfcc(frame,SAMPLE_RATE, winstep=(FRAME_SIZE_MS / 1000), 
                                         winlen= 4 * (FRAME_SIZE_MS / 1000), nfft=2048)
@@ -94,7 +110,7 @@ def denoiser_VAD(frame):
                 # print(mfcc_stream[0])
             count = count + 1
             if len(mfcc_stream) == FRAMES:
-                if count >= 2:
+                if count >= 1:
                     mfcc_stream_array = np.array(mfcc_stream)
                     mfcc_stream_array = mfcc_stream_array.transpose(1,0,2)
                     mfcc_stream_array = mfcc_stream_array.astype(np.float32)
@@ -102,12 +118,21 @@ def denoiser_VAD(frame):
                     output = model(test_data_tensor).to(device)
                     pred_y = torch.max(output, 1)[1].data.numpy()
                     result = pred_y[0]
-                    end = time.time()
-                    print(result)
-                    count = 0
+                    result_buffer.append(result)
+                    
+                    if len(result_buffer) >= 30:
+                        result_buffer.pop(0)
 
-                    if result == 1:
+                    end = time.time()
+                    
+                    
+                    # print(result_buffer)
+                    if 1 in result_buffer:
+                        result = 1
+                        # print(result)
                         return(result)
+            
+    # print(result)
     return(result)
 
 
