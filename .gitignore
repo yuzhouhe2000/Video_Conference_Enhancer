@@ -1,5 +1,7 @@
 .DS_Store
 *.th
+*.nbc
+*.nbi
 *.wav
 *.dat
 *.avi

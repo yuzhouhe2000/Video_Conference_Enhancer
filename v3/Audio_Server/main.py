@@ -94,16 +94,14 @@ def denoiser_live():
 
     while True:
         if len(audio_buffer) > 0:
-            while len(audio_buffer) > FRAME_LENGTH*5:
-                del(audio_buffer[0:FRAME_LENGTH])            
-                print("Processing speed is too slow. Switch to DSP denoiser or remove denoiser")
-            
-    
-
-            
+        
             start = time.time()
 
             if "DL" in Denoiser:
+                while len(audio_buffer) > FRAME_LENGTH*5:
+                    del(audio_buffer[0:FRAME_LENGTH])            
+                    print("Processing speed is too slow. Switch to DSP denoiser or remove denoiser")
+
                 if len(audio_buffer)>=FRAME_LENGTH:
                     frame = audio_buffer[0:FRAME_LENGTH]
                     del(audio_buffer[0:FRAME_LENGTH])
@@ -141,10 +139,13 @@ def denoiser_live():
                             CONNECTED = 1
                         else:
                             server_denoiser_sender.send_numpy_array(out)
-                            print(time.time()-start) 
+                            # print(time.time()-start) 
 
 
             elif "DSP" in Denoiser:
+                while len(audio_buffer) > 10:
+                    del(audio_buffer[0:FRAME_LENGTH])            
+                    print("Processing speed is too slow. Switch to DSP denoiser or remove denoiser")
                 frame = audio_buffer[0]
                 del(audio_buffer[0])
                 out = omlsa_streamer(frame,sample_rate, frame_length, frame_move,postprocess= "butter",high_cut=6000)
@@ -156,9 +157,11 @@ def denoiser_live():
                     CONNECTED = 1
                 else:
                     server_denoiser_sender.send_numpy_array(out)
-                    print(time.time()-start) 
+                    # print(time.time()-start) 
 
             else:
+                while len(audio_buffer) > 10:
+                    del(audio_buffer[0:FRAME_LENGTH])  
                 frame = audio_buffer[0]
                 del(audio_buffer[0])
                 out = frame
@@ -170,7 +173,7 @@ def denoiser_live():
                     CONNECTED = 1
                 else:
                     server_denoiser_sender.send_numpy_array(out)
-                    print(time.time()-start)
+                    # print(time.time()-start)
 
 threads.append(threading.Thread(target=receive_audio))
 threads.append(threading.Thread(target=denoiser_live))

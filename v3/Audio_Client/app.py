@@ -6,7 +6,6 @@ import sounddevice as sd
 import cv2
 from npsocket import SocketNumpyArray
 import numpy as np
-from camera_input import video_input 
 import socket
 
 
@@ -101,7 +100,7 @@ def output_audio():
         else:
             out = client_denoiser_receiver.receive_array()
             # print(out)
-            print(out.shape)
+            # print(out.shape)
             stream_out.write(out)
     stream_out.stop()
     return ('', 204)
