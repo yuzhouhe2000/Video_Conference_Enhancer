@@ -36,7 +36,7 @@ Note: [two denoisers are included, one based on Demucs network ("DL"), one based
 
         3. Estimate distance using eye separation and focal length
 
-        4. Send distance information to Audio Server
+        4. Send distance information to Audio Client* (assume video processor runs on the same device as client)
 
         5. Send position information to Pan-Tilt Camera / digital zoom
 
