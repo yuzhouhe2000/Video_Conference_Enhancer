@@ -66,12 +66,14 @@ Move "[denoiser.th](https://drive.google.com/file/d/17WuFlrUMJZdYiYEqvBfq4hmAd3x
         
         python3 dlib_distance_detector.py
 
+(Note: we include a dlib face_landmark model for eye detection with glasses, and a python-opencv model for eye detection without glasses. Both works well with no glasses case. However, the dlib package is harder to install, and the model is larger because it includes the entire face map)
+
     5. open flask site in chrome "http://127.0.0.1:5000/")
 
-    [Notes: The default IP configuration allows you to run both client and server on the same device. (127.0.0.1) You need to reconfigure the ip and port if you are running them on separate devices.]
+[Note: The default IP configuration allows you to run both client and server on the same device. (127.0.0.1) You need to reconfigure the ip and port if you are running them on separate devices.]
     
 
-Notes:
+Note:
 
 If you want to test out individual modules:
 
@@ -107,7 +109,7 @@ If OSX limits the maximum UDP-package to be 9216, input the following command in
     sudo sysctl -w net.inet.udp.maxdgram=65535
 
 
-If dlib fails to install, try to install from source (the following code works for OSX)):
+If dlib fails to install, try to install from source (the following code works for OSX):
 
     git clone https://github.com/davisking/dlib.git
 
@@ -125,4 +127,10 @@ If dlib fails to install, try to install from source (the following code works f
 
 If there is an error that says "the selected port is already binded" or anything similar:
 
-    Go to main.py in Audio_Server and app.py in Audio_Client, change all the port from 9999-9996 to any other port in 9000-9999 range. This error is because the UDP receiver is closed before sender. You should always open UDP receiver first, and close UDP sender first. (which means run Server main.py file before Client flask run, and close Client window before server when quit the program.)
+    Go to main.py in Audio_Server and app.py in Audio_Client, change all the port from 9999-9996 to any other port in 9000-9999 range. 
+    
+    This error is because the UDP receiver is closed before sender. 
+    
+    You should always open UDP receiver first, and close UDP sender first. 
+    
+    (which means run Server main.py file before Client flask run, and close Client window before server when quit the program.)
