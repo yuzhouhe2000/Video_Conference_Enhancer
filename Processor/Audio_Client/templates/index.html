@@ -44,10 +44,47 @@
         color: #d1d1d1;
       }
       </style>
+
+      
+
     <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js" integrity="sha512-aMGMvNYu8Ue4G+fHa359jcPb1u+ytAF+P2SCb+PxrjCdO3n3ZTxJ30zuH39rimUggmTwmh2u7wvQsDTHESnmfQ==" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script type="text/javascript" charset="utf-8">
+      $(document).ready(function() {
+          var socket = io();
+          socket.on("plot", data => {
+          var plot = data.data;
+          console.log(plot)
+          var eq_curve = [];
+
+          for (const [key, value] of Object.entries(plot)){
+            var pair = {x:parseInt(key),y:value}
+            eq_curve.push(pair)
+          }
+
+          console.log(eq_curve)
+            var chart = new CanvasJS.Chart("chartContainer", {
+          animationEnabled: true,  
+          title:{
+            text: "Frequency Response"
+          },
+          axisY: {
+            title: "Magnitude Response",
+            suffix: "db",
+          },
+          data: [{
+            type: "spline",
+            dataPoints: eq_curve
+          }]
+        });
+        chart.render()
+      });
+    })
+  </script>
+  
+  
   </head>
 
   <body>
@@ -76,39 +113,48 @@
           }
     </script>
    
-    <div class="test_temp" style="width:50%; height: 50px; float:left;">  <h2>Start Denoiser</h2>  </div>
-
+    <div class="test_temp" style="width:20%; height: 80px; float:left;padding-left: 300px;">  <h2>Start Denoiser</h2>  </div>
+    <div class="test_temp" style="width:20%; height: 80px; float:right; padding-right: 350px;">  <h2>Control Panel</h2>  </div>
     <HR style="FILTER: alpha(opacity=100,finishopacity=0,style=3)" width="80%" color=#987cb9 SIZE=3>
 
-    <div class="test_temp" style="width:50%; height: 170px; float:left;"> 
+    <div class="test_temp" style="width:20%; height: 300px; float:left;padding-left: 300px;"> 
       <div id="live">
         <button id="liveButton">start denoiser live</button>
         <button id="stopLive" disabled>exit denoiser live</button>
        </div>
     </div>
-    <HR style="FILTER: alpha(opacity=100,finishopacity=0,style=3)" width="80%" color=#987cb9 SIZE=3>
-
-
-    <div id="speechTranscriptContainer">
-        <h2 id = "status">Welcome to EE434 Project Demo.</h2>
-        <div id="log"></div>
-        <div id = "count" num="{{COUNT}}" ></div>
-    </div>
 
 
     <form method="post" id="form">
-      <div style="height: 50px;">
-      <label for="EQ">EQ parameters:</label>
-      <input type="text" name="EQ" id="EQ" placeholder="input 5 parameters for EQ">
+      <div style="width:50%; height: 30px;float:left;position: relative;">
+      <label for="EQ_LP">Low Pass Filter Parameter:</label>
+      <input type="text" name="EQ_LP" id="EQ_LP" placeholder="Freqeucny(Hz) Q A">
     </div>
-    <div style="height: 50px;">
+
+    <div style="width:50%; height: 30px;float:left;position: relative;">
+      <label for="EQ_LS">Low Shelf Filter Parameter:</label>
+      <input type="text" name="EQ_LS" id="EQ_LS" placeholder="Freqeucny(Hz) Q A">
+    </div>
+    <div style="width:50%; height: 30px;float:left;position: relative;">
+      <label for="EQ_PK">Peaking EQ Parameter:</label>
+      <input type="text" name="EQ_PK" id="EQ_PK" placeholder="Freqeucny(Hz) Q A">
+    </div>
+    <div style="width:50%; height: 30px;float:left;position: relative;">
+      <label for="EQ_HS">High Shelf Parameters:</label>
+      <input type="text" name="EQ_HS" id="EQ_HS" placeholder="Freqeucny(Hz) Q A">
+    </div>
+    <div style="width:50%; height: 30px;float:left;position: relative;">
+      <label for="EQ_HP">High Pass Parameters:</label>
+      <input type="text" name="EQ_HP" id="EQ_HP" placeholder="Freqeucny(Hz) Q A">
+    </div>
+
+      <div style="width:50%; height: 30px; float:left;position: relative;">
       <label for="Denoiser">Denoiser type:</label>
       <input type="text" name="Denoiser" id="Denoiser" placeholder="DL, DSP, VAD, DL+VAD">
-      
     </div>
-    <div>
+      <div style="width:50%; height: 30px; float:left;position: relative;">
       <button type="submit">Update Parameters</button>
-    </div>
+      </div>
   </form>
 
       <!--Jquery Cdn -->
@@ -124,7 +170,11 @@
       type:'POST',
       url:'/param',
       data:{
-        EQ:$("#EQ").val(),
+        EQ_LP:$("#EQ_LP").val(),
+        EQ_LS:$("#EQ_LS").val(),
+        EQ_PK:$("#EQ_PK").val(),
+        EQ_HS:$("#EQ_HS").val(),
+        EQ_HP:$("#EQ_HP").val(),
         Denoiser:$("#Denoiser").val()
       }
       
@@ -134,11 +184,29 @@
 </script>
 
 <script>
-  var EQ_input = document.getElementById('EQ');
+  
+  var EQ_LP = document.getElementById('EQ_LP');
+  var EQ_LS = document.getElementById('EQ_LS');
+  var EQ_PK = document.getElementById('EQ_PK');
+  var EQ_HS = document.getElementById('EQ_HS');
+  var EQ_HP = document.getElementById('EQ_HP');
   var Denoiser_input = document.getElementById('Denoiser');
-  EQ_input.setAttribute('size',EQ_input.getAttribute('placeholder').length);
+  EQ_LP.setAttribute('size',EQ_LP.getAttribute('placeholder').length);
+  EQ_LS.setAttribute('size',EQ_LS.getAttribute('placeholder').length);
+  EQ_PK.setAttribute('size',EQ_PK.getAttribute('placeholder').length);
+  EQ_HS.setAttribute('size',EQ_HS.getAttribute('placeholder').length);
+  EQ_HP.setAttribute('size',EQ_HP.getAttribute('placeholder').length);
   Denoiser_input.setAttribute('size',Denoiser_input.getAttribute('placeholder').length);
 </script>
+
+
+
+  
+  <div id="chartContainer" style="width:80%; height: 370px;float:left;padding-left: 100px;"></div>
+  <script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
+
+
+
         	 	
 
     <script src="/static/js/app.js"></script>

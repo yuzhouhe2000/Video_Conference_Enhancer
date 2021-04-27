@@ -54,7 +54,12 @@ threads = []
 
 MIX = 40
 Denoiser = "DSP"
-EQ_params = 0
+EQ_LP = 0
+EQ_LS = 0
+EQ_PK = 0
+EQ_HS = 0
+EQ_HP = 0
+
 
 
 
@@ -64,11 +69,15 @@ def receive_audio_parameter():
     while True:
         recieved = server_parameter_receiver.recvfrom(1024)
         json_obj = json.loads(recieved[0].decode('utf-8'))
+        print(json_obj)
         MIX = json_obj.get("MIX")
         Denoiser = json_obj.get("Denoiser")
-        EQ_params = json_obj.get("EQ")
-        # audio_buffer = []
-        print(str(MIX) + " " + str(Denoiser)  + " " + str(EQ_params))
+        EQ_LP = json_obj.get("EQ_LP")
+        EQ_LS = json_obj.get("EQ_LS")
+        EQ_PK = json_obj.get("EQ_PK")
+        EQ_HS = json_obj.get("EQ_HS")
+        EQ_HP = json_obj.get("EQ_HP")
+
 
 def receive_audio():
     global audio_buffer

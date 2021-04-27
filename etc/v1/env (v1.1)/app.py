@@ -62,7 +62,6 @@ def write(wav, filename, sr=16_000):
 # set up sound resource folder
 app.config['UPLOAD_FOLDER'] = 'sound'
 
-
 @app.route('/sound/<filename>')
 def uploaded_file(filename):
     response =  send_from_directory(app.config['UPLOAD_FOLDER'],filename)

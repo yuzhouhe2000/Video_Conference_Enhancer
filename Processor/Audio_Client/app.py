@@ -7,7 +7,7 @@ import cv2
 from npsocket import SocketNumpyArray
 import numpy as np
 import socket
-
+from equalizer import *
 from VAD import denoiser_VAD
 
 
@@ -21,6 +21,7 @@ COUNT = 0
 LIVE = 0
 VAD_RESULT = 0
 volume = 1
+EQ_curve = 0
 Denoiser = "DSP"
 buffer = []
 outport_denoiser = 9999
@@ -35,7 +36,6 @@ client_parameter_sender = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 server_video_receiver = socket.socket(socket.AF_INET,socket.SOCK_DGRAM) 
 server_video_receiver.bind(("127.0.0.1",video_port))
 
-
 @app.route("/", methods=['GET', 'POST'])
 def index():
     return render_template("index.html")
@@ -44,9 +44,18 @@ def index():
 def parameter():
     global Denoiser
 
-    EQ_params = request.form.get("EQ")
+    EQ_LP = request.form.get("EQ_LP")
+    EQ_LS = request.form.get("EQ_LS")
+    EQ_PK = request.form.get("EQ_PK")
+    EQ_HS = request.form.get("EQ_HS")
+    EQ_HP = request.form.get("EQ_HP")
     Denoiser = request.form.get("Denoiser")
-    parameters = {"EQ": EQ_params, "Denoiser": Denoiser, "MIX": MIX}
+
+    EQ_curve = {1:2,2:3,4:5,6:7,7:8}
+
+    socketio.emit('plot',{'data': EQ_curve})
+    # return SOS expression
+    parameters = {"EQ_LP":EQ_LP,"EQ_LS":EQ_LS,"EQ_PK":EQ_PK,"EQ_HS":EQ_HS,"EQ_HP":EQ_HP, "Denoiser": Denoiser, "MIX": MIX}
     parameters_json = json.dumps(parameters).encode('utf-8')
     client_parameter_sender.sendto(parameters_json, ("127.0.0.1", outport_parameter))
     # print(parameters_json)
@@ -132,8 +141,6 @@ def end_live():
     LIVE = 0
     socketio.emit('my_response',{'data': ""})
     return ('', 204)
-
-
 
 @app.route("/volume", methods=['POST'])
 def receive_video_parameter():
