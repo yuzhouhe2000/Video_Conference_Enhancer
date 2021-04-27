@@ -61,6 +61,7 @@ def parameter():
     h_list = []
     sos_list = ""
     SOS_LIST = []
+    Z_LIST = []
     
     if Q != "":
         Q = float(Q)
