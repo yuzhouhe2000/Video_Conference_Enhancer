@@ -7,25 +7,34 @@ Team: Michael Pozzi, Matt Baseheart, Yuzhou He
 ![Flask App](example.jpeg)
 
 How it works:
-
-    After Audio Client collects Input Frames 
     
-    [16k Hz for speech detection + single channel for speed]
+    [Note: 16k Hz for speech detection + single channel for speed]
+
+    [Note: the server and client can be run on different or same device. Server can be Jetson and Client can be PC.]
+
+    [Note: all the processes below run on different threads at the same time.]
+
+    0. Client receives EQ parameters and audio chain components from user input, and update to server
+
+    1. Client program receive audio input from microphone
     
-        1. If Voice Activity Detected: Client send the audio data to Server through UDP
+    2. Raw input is passed to Voice Activity Detection module (optional, only recommended when using Demucs)
 
-        2. Another thread waits for server output and play the output
+        If VAD is on and speech detected: Client send the audio data to Server through UDP
 
-    When Audio Server receives Input:
+    3. Server receives the raw audio, and passes it to denoiser (either DSP or DL)
 
-        1. To Denoiser 
-        
-        2. To EQ
+    4. Server send the denoised audio back to the Client through UDP
 
-        3. To video based enhancement 
+    5. Client passes the denoised audio to EQ
 
-        4. Send processed audio back to Client through UDP
+    6. Client receives distance information from video processor
 
+    7. Client adjust the volume based on distance
+
+    8. Client output the audio to the output device
+
+    
 Note: [two denoisers are included, one based on Demucs network ("DL"), one based on OMLSA + IMCRA algorithm ("DSP")] The Demucs network is trained on the entire valentini dataset + DNS dataset with hidden size = 48, plus some office/room noises downloaded from youtube and Audioset. The Demucs Network runs slow on CPU, so DSP denoiser is prefered. Demucs can run in real time on 4 i-5 cpu cores, add VAD module can help reduce the computation when no speech is detected.]
 
     Video Module (works separately from flask app):
@@ -36,7 +45,7 @@ Note: [two denoisers are included, one based on Demucs network ("DL"), one based
 
         3. Estimate distance using eye separation and focal length
 
-        4. Send distance information to Audio Client* (assume video processor runs on the same device as client)
+        4. Send distance information to Audio Client
 
         5. Send position information to Pan-Tilt Camera / digital zoom
 
