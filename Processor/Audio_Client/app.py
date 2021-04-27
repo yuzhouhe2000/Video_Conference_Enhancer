@@ -44,56 +44,66 @@ def index():
 @app.route('/param', methods=['POST'])
 def parameter():
     global Denoiser
-    Q = 3
-    A = 1
+
     EQ_LP = request.form.get("EQ_LP")
     EQ_LS = request.form.get("EQ_LS")
     EQ_PK = request.form.get("EQ_PK")
     EQ_HS = request.form.get("EQ_HS")
     EQ_HP = request.form.get("EQ_HP")
+    Q = request.form.get("Q")
+    A = request.form.get("A")
     Denoiser = request.form.get("Denoiser")
     h_list = []
+    if Q != "":
+        Q = float(Q)
+    else:
+        Q = 3
+
+    if A != "":
+        A = np.sqrt(float(A))
+    else:
+        A = np.sqrt(1.5)
 
     if EQ_LP != "":
         EQ_LP = int(EQ_LP)
         if EQ_LP >= 1 and EQ_LP <= 16000:
-            sos1 = lowpass(EQ_LP, Q)
-            w, h1 = signal.sosfreqz(sos1)
+            sos1 = lowpass(EQ_LP/16000*np.pi*2, Q)
+            w, h1 = signal.sosfreqz(sos1,fs = 16000)
             h_list.append(h1)
 
     if EQ_LS != "":
         EQ_LS = int(EQ_LS)
         if EQ_LS >= 1 and EQ_LS <= 16000:
-            sos2 = lowShelf(EQ_LS, Q,A)
-            w, h2 = signal.sosfreqz(sos2)
+            sos2 = lowShelf(EQ_LS/16000*np.pi*2, Q,A)
+            w, h2 = signal.sosfreqz(sos2,fs = 16000)
             h_list.append(h2)
 
     if EQ_PK != "":
         EQ_PK = int(EQ_PK)
         if EQ_PK >= 1 and EQ_PK <= 16000:
-            sos3 = peaking(EQ_PK, Q,A)
-            w, h3 = signal.sosfreqz(sos3)
+            sos3 = peaking(EQ_PK/16000*np.pi*2, Q,A)
+            w, h3 = signal.sosfreqz(sos3,fs = 16000)
             h_list.append(h3)
     
     if EQ_HS != "":
         EQ_HS = int(EQ_HS)
         if EQ_HS >= 1 and EQ_HS <= 16000:
-            sos4 = highShelf(EQ_HS, Q,A)
-            w, h4 = signal.sosfreqz(sos4)
+            sos4 = highShelf(EQ_HS/16000*np.pi*2, Q, A)
+            w, h4 = signal.sosfreqz(sos4,fs = 16000)
             h_list.append(h4)
 
     if EQ_HP != "":
         EQ_HP = int(EQ_HP)
         if EQ_HP >= 1 and EQ_HP <= 16000:
-            sos5 = highpass(EQ_HP, Q)
-            w, h5 = signal.sosfreqz(sos5)
+            sos5 = highpass(EQ_HP/16000*np.pi*2, Q)
+            w, h5 = signal.sosfreqz(sos5,fs = 16000)
             h_list.append(h5)
     
+
     h_all = 1
     for i in h_list:
         h_all = h_all * i
-    db = 20 * np.log10(np.maximum(np.abs(h_all), 1e-5))
-    print(w/np.pi)
+    db = np.maximum(np.abs(h_all), 1e-5)
     EQ_curve = {}
     for i in range(0,512):
         EQ_curve[w[i]] = db[i]
