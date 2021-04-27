@@ -53,7 +53,7 @@ threads = []
 
 
 MIX = 40
-Denoiser = "DSP"
+Denoiser = "DSP EQ"
 sos_list = ""
 
 
