@@ -60,7 +60,7 @@
           var eq_curve = [];
 
           for (const [key, value] of Object.entries(plot)){
-            var pair = {x:parseInt(key),y:value}
+            var pair = {x:parseFloat(key),y:value}
             eq_curve.push(pair)
           }
 
@@ -68,10 +68,10 @@
             var chart = new CanvasJS.Chart("chartContainer", {
           animationEnabled: true,  
           title:{
-            text: "Frequency Response"
+            text: "EQ Response"
           },
           axisY: {
-            title: "Magnitude Response",
+            title: "Magnitude",
             suffix: "db",
           },
           data: [{
