@@ -12,9 +12,9 @@ from real_time_omlsa.omlsa import *
 import json
 
 
-inport = 9999
-outport = 9998
-parameter_port = 9997
+inport = 9991
+outport = 9992
+parameter_port = 9993
 
 server_parameter_receiver = socket.socket(socket.AF_INET,socket.SOCK_DGRAM) 
 server_parameter_receiver.bind(("127.0.0.1",parameter_port))
@@ -54,17 +54,13 @@ threads = []
 
 MIX = 40
 Denoiser = "DSP"
-EQ_LP = 0
-EQ_LS = 0
-EQ_PK = 0
-EQ_HS = 0
-EQ_HP = 0
+sos_list = ""
 
 
 
 
 def receive_audio_parameter():
-    global MIX,Denoiser,EQ_params,audio_buffer
+    global MIX,Denoiser,sos_list,audio_buffer
     
     while True:
         recieved = server_parameter_receiver.recvfrom(1024)
@@ -72,12 +68,7 @@ def receive_audio_parameter():
         print(json_obj)
         MIX = json_obj.get("MIX")
         Denoiser = json_obj.get("Denoiser")
-        EQ_LP = json_obj.get("EQ_LP")
-        EQ_LS = json_obj.get("EQ_LS")
-        EQ_PK = json_obj.get("EQ_PK")
-        EQ_HS = json_obj.get("EQ_HS")
-        EQ_HP = json_obj.get("EQ_HP")
-
+        sos_list = json_obj.get("sos")
 
 def receive_audio():
     global audio_buffer
