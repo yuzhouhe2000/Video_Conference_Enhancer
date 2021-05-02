@@ -74,18 +74,19 @@ while 1:
     #Get Values
     for (x,y,w,h) in faces:
         face_size = w
-        cv2.rectangle(img,(x,y),(x+w,y+h),(255,0,0),2)
         roi_gray = gray[y:y+h, x:x+w]
         roi_color = img[y:y+h, x:x+w]
         
         eyes = eye_cascade.detectMultiScale(roi_gray)
         temp = 0
+
+
         for (ex,ey,ew,eh) in eyes:
             if len(eyes) == 2:
                 eye_size = abs(ex - temp)
                 temp = ex
 
-            cv2.rectangle(roi_color,(ex,ey),(ex+ew,ey+eh),(0,255,0),2)
+            
 
             #Moving Average Filter for Facial Size
             face_vect[index] = face_size
@@ -122,5 +123,9 @@ while 1:
             k = cv2.waitKey(30) & 0xff
             if k == 27:
                 break
+        cv2.rectangle(img,(x,y),(x+w,y+h),(255,0,0),2)
+        cv2.rectangle(roi_color,(ex,ey),(ex+ew,ey+eh),(0,255,0),2)
+        cv2.circle(roi_color, (int(ex+ew/2),int(ey+eh/2)), 2, (0,0,255))
+        cv2.imshow('img',img)
 
 cap.release()

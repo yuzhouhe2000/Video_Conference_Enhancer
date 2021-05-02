@@ -3,9 +3,9 @@ Flask-SocketIO==5.0.1
 pydub==0.24.1
 numpy==1.19.0
 sounddevice==0.4.0
-torch==1.5.1
+torch==1.8.1
 opencv-python
-torchvision==0.8.1
+torchvision==0.9.1
 librosa==0.8.0
 scipy
 

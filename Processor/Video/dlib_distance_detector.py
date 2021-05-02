@@ -17,7 +17,7 @@ client_video_sender = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
 
 def landmarks_to_np(landmarks, dtype="int"):
-    # 获取landmarks的数量
+
     num = landmarks.num_parts
     
     # initialize the list of (x, y)-coordinates
@@ -30,14 +30,10 @@ def landmarks_to_np(landmarks, dtype="int"):
     # return the list of (x, y)-coordinates
     return coords
 
-#==============================================================================
-#   2.绘制回归线 & 找瞳孔函数
-#       输入：图片 & numpy格式的landmarks
-#       输出：左瞳孔坐标 & 右瞳孔坐标
-#==============================================================================   
+
 
 def get_centers(img, landmarks):
-    # 线性回归
+
     EYE_LEFT_OUTTER = landmarks[2]
     EYE_LEFT_INNER = landmarks[3]
     EYE_RIGHT_OUTTER = landmarks[0]
@@ -60,7 +56,7 @@ def get_centers(img, landmarks):
     
     return LEFT_EYE_CENTER, RIGHT_EYE_CENTER
 
-
+    
 
 predictor_path = "shape_predictor_5_face_landmarks.dat"#人脸关键点训练数据路径
 detector = dlib.get_frontal_face_detector()#人脸检测器detector
@@ -68,6 +64,10 @@ predictor = dlib.shape_predictor(predictor_path)#人脸关键点检测器predict
 
 cap = cv2.VideoCapture(0)#开启摄像头
 
+eye_dist = np.array([])
+face_dist = np.array([])
+face_check = 0
+frame = 0
 while(cap.isOpened()):
     #读取视频帧
     _, img = cap.read()
@@ -86,6 +86,20 @@ while(cap.isOpened()):
         w_face = rect.right() - x_face
         h_face = rect.bottom() - y_face
         
+        #Get Face width average 
+        if face_check == 0: 
+            face_check = w_face
+        face_dist = np.append(face_dist, w_face)
+        face_avg = np.mean(face_dist)
+        if len(face_dist) == 10:
+            face_dist = np.delete(face_dist, 0)
+        
+        #Adjust frame check
+        if frame == 30: 
+            face_check = face_avg
+            frame = 0
+        frame = frame +  1
+
         # 绘制边框，加文字标注
         cv2.rectangle(img, (x_face,y_face), (x_face+w_face,y_face+h_face), (0,255,0), 2)
         cv2.putText(img, "Face #{}".format(i + 1), (x_face - 10, y_face - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2, cv2.LINE_AA)
@@ -100,6 +114,13 @@ while(cap.isOpened()):
         LEFT_EYE_CENTER, RIGHT_EYE_CENTER = get_centers(img, landmarks)
         
         Distance = np.sqrt(abs(RIGHT_EYE_CENTER[0] - LEFT_EYE_CENTER[0])^2 + abs(RIGHT_EYE_CENTER[1] - LEFT_EYE_CENTER[1])^2)
+
+        #Get eye width average
+        eye_dist = np.append(eye_dist, Distance)
+        eye_avg = np.mean(eye_dist)
+
+        if len(eye_dist) == 10:
+            eye_dist = np.delete(eye_dist, 0)
 
         volume = Distance/10.0
    
@@ -117,6 +138,9 @@ while(cap.isOpened()):
         
     
     # 显示结果
+    if abs(face_avg - face_check) > 20:
+        print("Adjust Gain",  eye_avg)
+
     cv2.imshow("Result", img)
     
     k = cv2.waitKey(5) & 0xFF
