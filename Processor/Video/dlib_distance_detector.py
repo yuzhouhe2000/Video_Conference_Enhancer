@@ -10,6 +10,12 @@ import cv2
 import numpy as np
 import socket
 import json
+from adafruit_servokit import ServoKit
+kit=ServoKit(channels=4)
+
+def setServos(pan,tilt):
+    kit.servo[0].angle = pan
+    kit.servo[1].angle = tilt
 
 video_port = 9996
 
@@ -56,7 +62,8 @@ def get_centers(img, landmarks):
     
     return LEFT_EYE_CENTER, RIGHT_EYE_CENTER
 
-    
+
+
 
 predictor_path = "shape_predictor_5_face_landmarks.dat"#人脸关键点训练数据路径
 detector = dlib.get_frontal_face_detector()#人脸检测器detector
@@ -68,6 +75,18 @@ eye_dist = np.array([])
 face_dist = np.array([])
 face_check = 0
 frame = 0
+
+#Get camera parameters 
+width = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
+height = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
+print(width,height)
+
+#Initialize camera 
+pan = 90
+tilt = 45
+setServos(pan, tilt)
+
+
 while(cap.isOpened()):
     #读取视频帧
     _, img = cap.read()
@@ -85,7 +104,7 @@ while(cap.isOpened()):
         y_face = rect.top()
         w_face = rect.right() - x_face
         h_face = rect.bottom() - y_face
-        
+
         #Get Face width average 
         if face_check == 0: 
             face_check = w_face
@@ -94,6 +113,34 @@ while(cap.isOpened()):
         if len(face_dist) == 10:
             face_dist = np.delete(face_dist, 0)
         
+        #Set pan/tilt 
+        center_x = x_face + w_face/2
+        center_y = y_face + h_face/2
+
+        errorPan = center_x - width/2
+        errorTilt = center_y - height/2
+
+        if abs(errorPan)>15:
+            pan = pan-errorPan/75
+        if abs(errorTilt)>15:
+            tilt = tilt - errorTilt/75
+
+        if pan>180:
+            pan=180
+            print("Pan Out of  Range")   
+        if pan<0:
+            pan=0
+            print("Pan Out of  Range") 
+        if tilt>180:
+            tilt=180
+            print("Tilt Out of  Range") 
+        if tilt<0:
+            tilt=0
+            print("Tilt Out of  Range")                 
+
+        kit.servo[0].angle=pan
+        kit.servo[1].angle=tilt
+       
         #Adjust frame check
         if frame == 30: 
             face_check = face_avg
@@ -138,7 +185,7 @@ while(cap.isOpened()):
         
     
     # 显示结果
-    if abs(face_avg - face_check) > 20:
+    if abs(face_avg - face_check) > face_check*.25:
         print("Adjust Gain",  eye_avg)
 
     cv2.imshow("Result", img)
