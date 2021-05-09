@@ -12,8 +12,19 @@ from pydub import AudioSegment
 
 sample_rate, samples = wavfile.read('test_mono.wav')
 frequencies, times, spectrogram = signal.spectrogram(samples, sample_rate)
-
+original = plt.figure(1)
 plt.pcolormesh(times, frequencies, spectrogram)
 plt.ylabel('Frequency (Hz)')
 plt.xlabel('Time (s)')
+
+
+
+sample_rate, samples = wavfile.read('processed_mono.wav')
+frequencies, times, spectrogram = signal.spectrogram(samples, sample_rate)
+processed = plt.figure(2)
+plt.pcolormesh(times, frequencies, spectrogram)
+plt.ylabel('Frequency (Hz)')
+plt.xlabel('Time (s)')
+
+
 plt.show()

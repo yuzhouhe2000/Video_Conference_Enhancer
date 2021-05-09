@@ -139,7 +139,7 @@ def main():
 		print("Selected 2")
 		#SET
 		FS = 44100
-		sampleRate, inputArray = wavfile.read("test.wav")
+		sampleRate, inputArray = wavfile.read("test_mono.wav")
 
 		#GET FROM USER
 		print("LPF================================")
@@ -180,7 +180,7 @@ def main():
 		sos = highpass(W0, Q)
 		outputArray = signal.sosfilt(sos, inputArray4)
 
-		wavfile.write("processed2.wav", sampleRate, outputArray)
+		wavfile.write("processed_mono.wav", sampleRate, outputArray)
 
 if __name__ == '__main__':
 	main()
