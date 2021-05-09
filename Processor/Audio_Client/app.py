@@ -26,9 +26,9 @@ volume = 1
 EQ_curve = 0
 Denoiser = "DSP EQ"
 buffer = []
-outport_denoiser = 9991
-inport_denoiser = 9992
-outport_parameter = 9993
+outport_denoiser = 9999
+inport_denoiser = 9998
+outport_parameter = 9997
 video_port = 9996
 CONNECTED = 0
 client_denoiser_receiver = SocketNumpyArray()
@@ -133,8 +133,12 @@ def parameter():
         h_all = h_all * i
     db = np.maximum(np.abs(h_all), 1e-5)
     EQ_curve = {}
+
     for i in range(0,512):
-        EQ_curve[w[i]] = db[i]
+        try:
+            EQ_curve[w[i]] = db[i]            
+        except:
+            pass
 
     print(SOS_LIST)
     socketio.emit('plot',{'data': EQ_curve})
@@ -142,6 +146,7 @@ def parameter():
     parameters = {"sos":sos_list, "Denoiser": Denoiser, "MIX": MIX}
     parameters_json = json.dumps(parameters).encode('utf-8')
     client_parameter_sender.sendto(parameters_json, ("127.0.0.1", outport_parameter))
+        
     # print(parameters_json)
     return ('', 204)
 
@@ -211,6 +216,7 @@ def output_audio():
 
     while True:
         if CONNECTED == 0:
+            print("denoiser_connecting")
             client_denoiser_receiver.initialize_receiver(inport_denoiser)
             print("INITIALIZED") 
             CONNECTED = 1  

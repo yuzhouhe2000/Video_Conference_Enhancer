@@ -52,9 +52,7 @@ class Net(nn.Module):
         return h, c
     def forward(self, x):
         x, _ = self.rnn(x, self.hidden)
-
         x = x.contiguous().view(-1, FRAMES**2)
-
         x = self.relu(self.lin1(x))
         x = self.lin2(x)
         
@@ -62,7 +60,22 @@ class Net(nn.Module):
 
 model = Net()
 # print(model)
-            
+from prettytable import PrettyTable
+
+def count_parameters(model):
+    table = PrettyTable(["Modules", "Parameters"])
+    total_params = 0
+    for name, parameter in model.named_parameters():
+        if not parameter.requires_grad: continue
+        param = parameter.numel()
+        table.add_row([name, param])
+        total_params+=param
+    print(table)
+    print(f"Total Trainable Params: {total_params}")
+    return total_params
+    
+count_parameters(model)
+
 RESULT = ""
 
 mfcc_stream = []
@@ -70,6 +83,9 @@ VAD_buffer = []
 count = 0
 result = -1
 model.load_state_dict(torch.load("lstm.net",map_location=torch.device(device)))
+pytorch_total_params = sum(p.numel() for p in model.parameters())
+print(pytorch_total_params)
+# print(model)
 model.eval()
 result_buffer = []
 
