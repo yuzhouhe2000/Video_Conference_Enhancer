@@ -92,8 +92,9 @@ class myThread(threading.Thread):
         
         
     def run(self):
+        while True:
             # timeit.timeit('test(self.stream_in,self.name)', 'from __main__ import test','from myTread import self.stream_in,self.name',number = 1000)
-        print(timeit.timeit(lambda:test(self.frame,self.name), number=10))
+            print(timeit.timeit(lambda:test(self.frame,self.name), number=1))
         # timeit.timeit(lambda:test(self.frame,self.name), number=9)
         # time_taken = ((time.time()-start)/9)*1000
         # if time_taken > 30:
@@ -107,7 +108,7 @@ def test(frame,name):
 start = time.time()
 
 thread= []
-for i in range (0,30):
+for i in range (0,1):
     thread.append(myThread(i, "Thread-%s"%i, i))
     thread[i].start()
 

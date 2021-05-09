@@ -77,7 +77,7 @@ model = Net()
 print(model)
             
 RESULT = ""
-
+start = 0
 mfcc_stream = []
 count = 0
 result = -1
@@ -87,6 +87,7 @@ def denoiser_VAD(frame):
     global result
     global mfcc_stream
     global count
+    global start
     
     frame = frame.reshape((-1,)) 
     
@@ -102,6 +103,7 @@ def denoiser_VAD(frame):
             # print(mfcc_stream[0])
         count = count + 1
         if len(mfcc_stream) == FRAMES:
+            
             if count >= 10:
                 mfcc_stream_array = np.array(mfcc_stream)
                 mfcc_stream_array = mfcc_stream_array.transpose(1,0,2)
@@ -111,6 +113,8 @@ def denoiser_VAD(frame):
                 pred_y = torch.max(output, 1)[1].data.numpy()
                 result = pred_y[0]
                 end = time.time()
+                # print(en .d-start)
+                start = time.time()
                 count = 0
     return(result)
 
