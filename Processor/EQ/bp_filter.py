@@ -7,9 +7,9 @@ from scipy.io import wavfile
 from scipy.io.wavfile import write
 import soundfile as sf
 
-sample_rate, sig = wavfile.read('test_processed.wav')
+sample_rate, sig = wavfile.read('test_mono.wav')
 sos = signal.ellip(4,5,40,[.009,0.45],btype='bandpass', output='sos')
 filtered = signal.sosfilt(sos, sig)
 write_me = filtered / max(abs(filtered))
-sf.write('bp_test.flac', filtered, 44100)
+sf.write('processed_mono.wav', filtered, 44100)
 

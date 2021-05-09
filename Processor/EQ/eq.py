@@ -179,8 +179,9 @@ def main():
 		W0 = 2*math.pi*(F0/FS)
 		sos = highpass(W0, Q)
 		outputArray = signal.sosfilt(sos, inputArray4)
+		write_me = outputArray / max(abs(outputArray))
 
-		wavfile.write("processed_mono.wav", sampleRate, outputArray)
+		wavfile.write("processed_mono.wav", sampleRate, write_me)
 
 if __name__ == '__main__':
 	main()
