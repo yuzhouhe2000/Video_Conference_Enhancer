@@ -1,5 +1,4 @@
 import matplotlib.pyplot as plt
-#import matplotlib.axes.Axes as ax
 import numpy as np
 from scipy import signal
 from scipy.io import wavfile

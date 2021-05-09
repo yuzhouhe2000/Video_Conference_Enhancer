@@ -22,7 +22,7 @@ while(True):
 	write('test.wav', fs, myrecording)
 	toMono = AudioSegment.from_wav("test.wav")
 	toMono = toMono.set_channels(1)
-	print("Wrote to file")
+	print("Wrote to file. If satisfied with the following playback, please press ctrl + c to exit.")
 	toMono.export("test_mono.wav", format="wav")
 	sd.default.device = 12
 	output.write(myrecording)

@@ -1,16 +1,5 @@
-#FS = 44100
-#F0 = CENTER FREQUENCY
-#DBGAIN = FOR PEAKING AND SHELVING FILTERS, THE GAIN
-#Q =  RELATED TO BANDWIDTH
-
-
-#W0 = 2*PI *F0/FS
-#COSW0 = cos(W0)
-#SINW0 = sin(W0)
-#alpha = SINW0/2*Q
-
-#FOR PEAKING AND SHELVING EQ ONLY, CALCULATE
 #A = 10^(DBGAIN/40)
+#Q = Related to BW of Filter, suggested value is .707 for "sharp" changes or 1.1 for "rounded" changes
 
 import numpy as np
 from scipy.io import wavfile
@@ -18,7 +7,6 @@ from scipy import signal
 import math
 
 def lowpass(w0, Q):
-	#RETURNS SOS that can be used in SOSFILT
 	#LPF
 	#H(s) = 1/(s^2 + s/Q + 1)
 
@@ -132,9 +120,9 @@ def highShelf(w0, Q, A):
 	return sos
 
 def main():
-	mode = (int)(input("1 for \"Real Time\" 2 to process a file"))
+	mode = (int)(input("1 for \"Real Time\" 2 to process a file: "))
 	if(mode==1):
-		print("Selected 1")
+		print("Selected 1: This feature is not implemented yet")
 	else:
 		print("Selected 2")
 		#SET
@@ -143,39 +131,39 @@ def main():
 
 		#GET FROM USER
 		print("LPF================================")
-		F0 = (int)(input("Center frequency in Hz"))
-		Q = (float)(input("Q factor"))
+		F0 = (int)(input("Center frequency in Hz: "))
+		Q = (float)(input("Q factor: "))
 		W0 = 2*math.pi*(F0/FS)
 		sos = lowpass(W0, Q)
 		inputArray2 = signal.sosfilt(sos, inputArray)
 
 		#print("Low Shelf================================")
-		#F0 = (int)(input("Center frequency in Hz"))
-		#Q = (float)(input("Q factor"))
-		#A = (float)(input("A factor"))
+		#F0 = (int)(input("Center frequency in Hz: "))
+		#Q = (float)(input("Q factor: "))
+		#A = (float)(input("A factor: "))
 		#W0 = 2*math.pi*(F0/FS)
 		#sos = lowShelf(W0, Q, A)
 		#inputArray3 = signal.sosfilt(sos, inputArray2)
 
 		print("Peaking EQ================================")
-		F0 = (int)(input("Center frequency in Hz"))
-		Q = (float)(input("Q factor"))
-		A = (int)(input("A factor"))
+		F0 = (int)(input("Center frequency in Hz: "))
+		Q = (float)(input("Q factor: "))
+		A = (int)(input("A factor: "))
 		W0 = 2*math.pi*(F0/FS)
 		sos = peaking(W0, Q, A)
 		inputArray4 = signal.sosfilt(sos, inputArray2)
 
 		#print("High Shelf================================")
-		#F0 = (int)(input("Center frequency in Hz"))
-		#Q = (float)(input("Q factor"))
-		#A = (float)(input("A factor"))
+		#F0 = (int)(input("Center frequency in Hz: "))
+		#Q = (float)(input("Q factor: "))
+		#A = (float)(input("A factor: "))
 		#W0 = 2*math.pi*(F0/FS)
 		#sos = highShelf(W0, Q, A)
 		#inputArray5 = signal.sosfilt(sos, inputArray4)
 
 		print("HPF================================")
-		F0 = (int)(input("Center frequency in Hz"))
-		Q = (float)(input("Q factor"))
+		F0 = (int)(input("Center frequency in Hz: "))
+		Q = (float)(input("Q factor: "))
 		W0 = 2*math.pi*(F0/FS)
 		sos = highpass(W0, Q)
 		outputArray = signal.sosfilt(sos, inputArray4)
