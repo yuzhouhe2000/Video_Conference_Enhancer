@@ -60,10 +60,12 @@ eye_check_cnt = 0
 cnt = 0
 face_size= 0
 eye_size = 0
-
+count = 0
+x_array = np.array([])
 
 while 1:
     ret, img = cap.read()
+    start_time = time.time()
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     faces = face_cascade.detectMultiScale(gray, 1.3, 5)
 
@@ -73,6 +75,8 @@ while 1:
 
     #Get Values
     for (x,y,w,h) in faces:
+        np.append(x_array, x)
+        print(x)
         face_size = w
         roi_gray = gray[y:y+h, x:x+w]
         roi_color = img[y:y+h, x:x+w]
@@ -109,10 +113,10 @@ while 1:
             if eye_check_cnt > 10:
                 if diff > perc:
                     cam_distance = calculateDistance(eye_avg)
-                    print(cam_distance)
+
                     
 
-            cv2.imshow('img',img)
+            
             if cnt > 10:
                 face_check = face_avg
                 cnt = 0
@@ -123,9 +127,13 @@ while 1:
             k = cv2.waitKey(30) & 0xff
             if k == 27:
                 break
-        cv2.rectangle(img,(x,y),(x+w,y+h),(255,0,0),2)
-        cv2.rectangle(roi_color,(ex,ey),(ex+ew,ey+eh),(0,255,0),2)
-        cv2.circle(roi_color, (int(ex+ew/2),int(ey+eh/2)), 2, (0,0,255))
-        cv2.imshow('img',img)
+    cv2.rectangle(img,(x,y),(x+w,y+h),(255,0,0),2)
+    cv2.rectangle(roi_color,(ex,ey),(ex+ew,ey+eh),(0,255,0),2)
+    cv2.circle(roi_color, (int(ex+ew/2),int(ey+eh/2)), 2, (0,0,255))
+    cv2.imshow('img',img)
+
+    count = count + 1
+    if count == 1000:
+        break
 
 cap.release()

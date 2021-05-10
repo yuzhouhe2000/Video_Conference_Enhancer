@@ -133,96 +133,27 @@ while(cap.isOpened()):
     
     # 对每个检测到的人脸进行操作
     for i, rect in enumerate(rects):
-        # 得到坐标
         x_face = rect.left()
         y_face = rect.top()
         w_face = rect.right() - x_face
         h_face = rect.bottom() - y_face
 
-        #Get Face width average 
-        if face_check == 0: 
-            face_check = w_face
-        face_dist = np.append(face_dist, w_face)
-        face_avg = np.mean(face_dist)
-        if len(face_dist) == 10:
-            face_dist = np.delete(face_dist, 0)
-        
-        #Set pan/tilt 
-        center_x = x_face + w_face/2
-        center_y = y_face + h_face/2
+        print(x_face)
 
-        errorPan = center_x - width/2
-        errorTilt = center_y - height/2
-
-        if abs(errorPan)>15:
-            pan = pan-errorPan/75
-        if abs(errorTilt)>15:
-            tilt = tilt - errorTilt/75
-
-        if pan>180:
-            pan=180
-            print("Pan Out of  Range")   
-        if pan<0:
-            pan=0
-            print("Pan Out of  Range") 
-        if tilt>180:
-            tilt=180
-            print("Tilt Out of  Range") 
-        if tilt<0:
-            tilt=0
-            print("Tilt Out of  Range")                 
-
-       
-        #Adjust frame check
-        if frame == 30: 
-            face_check = face_avg
-            frame = 0
-        frame = frame +  1
-
-        # 绘制边框，加文字标注
         cv2.rectangle(img, (x_face,y_face), (x_face+w_face,y_face+h_face), (0,255,0), 2)
-        cv2.putText(img, "Face #{}".format(i + 1), (x_face - 10, y_face - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2, cv2.LINE_AA)
-        
         # 检测并标注landmarks        
         landmarks = predictor(gray, rect)
+
+        #print("Execution time", time.time()-start_time)
         landmarks = landmarks_to_np(landmarks)
         for (x, y) in landmarks:
             cv2.circle(img, (x, y), 2, (0, 0, 255), -1)
 
         # 线性回归
-        LEFT_EYE_CENTER, RIGHT_EYE_CENTER = get_centers(img, landmarks)
-        
-        Distance = np.sqrt(abs(RIGHT_EYE_CENTER[0] - LEFT_EYE_CENTER[0])^2 + abs(RIGHT_EYE_CENTER[1] - LEFT_EYE_CENTER[1])^2)
 
-        #Get eye width average
-        eye_dist = np.append(eye_dist, Distance)
-        eye_avg = np.mean(eye_dist)
-
-        if len(eye_dist) == 10:
-            eye_dist = np.delete(eye_dist, 0)
-
-        volume = Distance/10.0
-   
-        volume = (2.2 - volume)
-
-        if volume >= 1.5:
-            voume = 1.5
-        if volume <= 0.5:
-            volume = 0.5
-        
-        parameters = {"volume": volume}
     
-        parameters_json = json.dumps(parameters).encode('utf-8')
-        client_video_sender.sendto(parameters_json, ("127.0.0.1", video_port))
-        
-    
-    # 显示结果
-    if abs(face_avg - face_check) > face_check*.25:
-        print("Adjust Gain",  eye_avg)
-    
-    img = digi_zoom(eye_avg, img)
     cv2.imshow("Result", img)
-    print("Execution time", time.time()-start_time)
+
     k = cv2.waitKey(5) & 0xFF
     if k==27:   #按“Esc”退出
         break
