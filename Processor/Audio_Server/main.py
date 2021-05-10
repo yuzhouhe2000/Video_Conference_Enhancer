@@ -4,7 +4,7 @@ import numpy as np
 import time
 import socket
 import threading
-
+from asteroid.models import BaseModel
 from denoiser.demucs import DemucsStreamer
 from denoiser.utils import deserialize_model
 from npsocket import SocketNumpyArray
@@ -12,9 +12,40 @@ from real_time_omlsa.omlsa import *
 import json
 
 
-inport = 9991
-outport = 9992
-parameter_port = 9993
+inport = 9999
+outport = 9998
+parameter_port = 9997
+
+device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+print(device)
+MODEL_PATH = "denoiser/denoiser.th"
+# Load Model
+pkg = torch.load(MODEL_PATH,map_location=torch.device(device))
+if 'model' in pkg:
+    if 'best_state' in pkg:
+        pkg['model']['state'] = pkg['best_state']
+    model = deserialize_model(pkg['model'])
+else:
+    model = deserialize_model(pkg)
+model.eval()
+
+pytorch_total_params = sum(p.numel() for p in model.parameters())
+
+from prettytable import PrettyTable
+
+def count_parameters(model):
+    table = PrettyTable(["Modules", "Parameters"])
+    total_params = 0
+    for name, parameter in model.named_parameters():
+        if not parameter.requires_grad: continue
+        param = parameter.numel()
+        table.add_row([name, param])
+        total_params+=param
+    print(table)
+    print(f"Total Trainable Params: {total_params}")
+    return total_params
+    
+count_parameters(model)
 
 server_parameter_receiver = socket.socket(socket.AF_INET,socket.SOCK_DGRAM) 
 server_parameter_receiver.bind(("127.0.0.1",parameter_port))
@@ -27,25 +58,15 @@ server_denoiser_sender = SocketNumpyArray()
 # server_parameter_sender = SocketNumpyArray()
 
 # GLOBAL_VARIABLES
-MODEL_PATH = "denoiser/denoiser.th"
+
 DRY = 0.04
 frame_num = 1
 sample_rate = 16000
 CONNECTED = 0
 
-device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
-print(device)
+DCCRN_model = BaseModel.from_pretrained("JorisCos/DCCRNet_Libri1Mix_enhsingle_16k")
+DCCRN_model.eval()
 
-
-# Load Model
-pkg = torch.load(MODEL_PATH,map_location=torch.device(device))
-if 'model' in pkg:
-    if 'best_state' in pkg:
-        pkg['model']['state'] = pkg['best_state']
-    model = deserialize_model(pkg['model'])
-else:
-    model = deserialize_model(pkg)
-model.eval()
 
 # Threads
 audio_buffer = []
@@ -96,7 +117,7 @@ def denoiser_live():
         
             start = time.time()
 
-            if "DL" in Denoiser:
+            if "DL" or "Demucs" in Denoiser:
                 while len(audio_buffer) > FRAME_LENGTH*5:
                     del(audio_buffer[0:FRAME_LENGTH])            
                     print("Processing speed is too slow. Switch to DSP denoiser or remove denoiser")
@@ -126,6 +147,7 @@ def denoiser_live():
                 
                     out.clamp_(-1, 1)
                     out = out.cpu().numpy()
+                    
                     if CONNECTED == 0:
                         print("initialized sender")
                         time.sleep(2)
@@ -134,7 +156,31 @@ def denoiser_live():
                     else:
                         server_denoiser_sender.send_numpy_array(out)
                         # print(time.time()-start) 
+            elif "DCCRN" in Denoiser:
+                while len(audio_buffer) > FRAME_LENGTH*5:
+                    del(audio_buffer[0:FRAME_LENGTH])            
+                    print("Processing speed is too slow. Switch to DSP denoiser or remove denoiser")
 
+                if len(audio_buffer)>=FRAME_LENGTH:
+                    frame = audio_buffer[0:FRAME_LENGTH]
+                    del(audio_buffer[0:FRAME_LENGTH])
+
+                    frame = np.concatenate(frame)
+                    frame = torch.from_numpy(frame).mean(dim=1).to(device)
+                    out = DCCRN_model(frame)
+                    out = out.cpu().detach().numpy()
+                    out = np.transpose(out)
+                    out = out.reshape((2560,))
+
+                    if CONNECTED == 0:
+                        print("initialized sender")
+                        time.sleep(2)
+                        server_denoiser_sender.initialize_sender('127.0.0.1', outport)
+                        CONNECTED = 1
+                    else:
+                        server_denoiser_sender.send_numpy_array(out)
+                
+                
 
             elif "DSP" in Denoiser:
                 while len(audio_buffer) > 20:
@@ -147,7 +193,7 @@ def denoiser_live():
                     out = out.astype(np.float32)   
                     if CONNECTED == 0:
                         print("initialized sender")
-                        time.sleep(1)
+                        time.sleep(3)
                         server_denoiser_sender.initialize_sender('127.0.0.1', outport)
                         CONNECTED = 1
                     else:
@@ -164,7 +210,7 @@ def denoiser_live():
 
                     if CONNECTED == 0:
                         print("initialized sender")
-                        time.sleep(1)
+                        time.sleep(3)
                         server_denoiser_sender.initialize_sender('127.0.0.1', outport)
                         CONNECTED = 1
                     else:
