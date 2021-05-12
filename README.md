@@ -8,21 +8,21 @@ Team: Michael Pozzi, Matt Baseheart, Yuzhou He
 
 How it works:
     
-    [Note: 16k Hz for speech detection + single channel for speed]
+    [Note: 16k Hz for speech detection + single channel for speed. Can be adjusted to fit requirement, but demucs model only works at 16K Hz]
 
-    [Note: the server and client can be run on different or same device. Server can be Jetson and Client can be PC.]
+    [Note: the server and client can be run on different or same device, but UDP from Jetson to PC is not supported]
 
-    [Note: all the processes below run on different threads at the same time.]
+    [Note: all the processes below run on different threads in parallel]
 
     0. Client receives EQ parameters and audio chain components from user input, and update to server
 
     1. Client program receive audio input from microphone
     
-    2. Raw input is passed to Voice Activity Detection module (optional, only recommended when using Demucs)
+    2. Raw input is passed to Voice Activity Detection module (optional, only recommended when using Demucs/DCCRN)
 
         If VAD is on and speech detected: Client send the audio data to Server through UDP
 
-    3. Server receives the raw audio, and passes it to denoiser (either DSP or DL)
+    3. Server receives the raw audio, and passes it to denoiser (either DSP, Demucs, or DCCRN)
 
     4. Server send the denoised audio back to the Client through UDP
 
@@ -34,13 +34,13 @@ How it works:
 
     8. Client output the audio to the output device
     
-Note: [two denoisers are included, one based on Demucs network ("DL"), one based on OMLSA + IMCRA algorithm ("DSP")] The Demucs network is trained on the entire valentini dataset + DNS dataset with hidden size = 48, plus some office/room noises downloaded from youtube and Audioset. The Demucs Network runs slow on CPU, so DSP denoiser is prefered. Demucs can run in real time on 4 i-5 cpu cores, add VAD module can help reduce the computation when no speech is detected.]
+Note: [Three denoisers are included, one based on Demucs network ("Demucs"), one based on DCCRN network ("DCCRN"), one based on OMLSA + IMCRA algorithm ("DSP")] The Demucs network is trained on the entire valentini dataset + DNS dataset with hidden channel size = 48, plus some office/room noises downloaded from youtube and Audioset. The Demucs/DCCRN Network runs slow on CPU, so DSP denoiser is prefered. Demucs/DCCRN can run in real time on 4 i-5 cpu cores, add VAD module can help reduce the computation when no speech is detected.]
 
     Video Module (works separately from flask app):
 
         1. Detect and mark face 
 
-        2. Detect Eyes and measure eye separations (support glasses). Using moving average filter for stable output.
+        2. Detect Eyes and measure eye separations (support glasses)
 
         3. Estimate distance using eye separation and focal length
 
@@ -48,7 +48,7 @@ Note: [two denoisers are included, one based on Demucs network ("DL"), one based
 
         5. Send position information to Pan-Tilt Camera / digital zoom
 
-Pipelines:
+Block diagrams of the pipelines:
 
 ![Pipelines](mode2.jpeg)
 
@@ -58,15 +58,17 @@ Download "denoiser.th" from drive.
 
 Move "[denoiser.th](https://drive.google.com/file/d/17WuFlrUMJZdYiYEqvBfq4hmAd3x_NwDm/view?usp=sharing)" to 434-project/Processor/Audio_Server/denoiser/denoiser.th
 
-    1. pip3 install -r requirements.txt
+    1. pip3 install -r requirements.txt   (recommend use conda python3.7)
 
-    2. on Jetson or on any device for server (need to run server first to allow UDP binding):
+    [This only installs basic libraries. Need to install extra libraries if you are using servokit, asteriod or dlib]
+
+    2. run server first to allow UDP binding:
 
         cd 434-project/Processor/Audio_Server
 
         python3 main.py
 
-    3. on PC or any device for client (needs to have sounddevice):
+    3. run client: needs to have sounddevice configured inside app.py (the default only works on Mac + soundflower):
     
         cd 434-project/Processor/Audio_Client
 
@@ -112,6 +114,30 @@ If you want to test out individual modules:
         cd 434-project/etc/v1/env\ \(v1.1\)
 
         flask run 
+
+
+Video pipeline:
+![Video Pipelines](video_pipeline.jpeg)
+The pipeline goes as follows:
+    1. Get frame 
+    2. Convert to gray 
+    3. Get faces from detector 
+    4. Find coordinates of face from rect 
+    5. Get face width average 
+    6. Adjust frame check value 
+    7. Put rectange over face 
+    8. Change servos 
+    9. Find facial features from predictor 
+    10. Put dots on features 
+    11. Get left and right eye centers from features 
+    12. Get Distance
+    13. Get eye width average 
+    14. Average eye dsitance 
+    15. Check if face size has changed significantly 
+    16. If changed significantly, adjust gain 
+    17. Implement digital zoom 
+    18. Display image 
+
 
 
 Common Errors and Warnings:
