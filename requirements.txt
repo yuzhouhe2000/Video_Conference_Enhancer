@@ -8,4 +8,7 @@ opencv-python
 torchvision==0.9.1
 librosa==0.8.0
 scipy
+asteriod
+prettytable
+
 

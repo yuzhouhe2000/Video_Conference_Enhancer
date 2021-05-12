@@ -33,7 +33,6 @@ How it works:
     7. Client adjust the volume based on distance
 
     8. Client output the audio to the output device
-
     
 Note: [two denoisers are included, one based on Demucs network ("DL"), one based on OMLSA + IMCRA algorithm ("DSP")] The Demucs network is trained on the entire valentini dataset + DNS dataset with hidden size = 48, plus some office/room noises downloaded from youtube and Audioset. The Demucs Network runs slow on CPU, so DSP denoiser is prefered. Demucs can run in real time on 4 i-5 cpu cores, add VAD module can help reduce the computation when no speech is detected.]
 
@@ -48,6 +47,10 @@ Note: [two denoisers are included, one based on Demucs network ("DL"), one based
         4. Send distance information to Audio Client
 
         5. Send position information to Pan-Tilt Camera / digital zoom
+
+Pipelines:
+
+![Pipelines](mode2.jpeg)
 
 To run the flask server (linux/mac):
 
