@@ -22,12 +22,12 @@ while(True):
 	
 	#NORMALIZE and CONVERT TO MONO
 	myrecording = myrecording / max(abs(myrecording))
-	write('test.wav', fs, myrecording)
-	toMono = AudioSegment.from_wav("test.wav")
+	write('Testing_Files/test.wav', fs, myrecording)
+	toMono = AudioSegment.from_wav("Testing_Files/test.wav")
 	toMono = toMono.set_channels(1)
 
 	#EXPORT FILE and PROMPT EXIT
-	toMono.export("test_mono.wav", format="wav")
+	toMono.export("Testing_Files/test_mono.wav", format="wav")
 	print("Wrote to file. If satisfied with the following playback, please press ctrl + c to exit.")
 
 	#PLAY FILE

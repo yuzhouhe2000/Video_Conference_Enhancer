@@ -133,7 +133,7 @@ def main():
 	#Accept input, create filters, apply filter
 	print("LOW PASS FILTER SETTINGS")
 	F0 = (int)(input("Center frequency in Hz: "))
-	Q = (float)(input("Q factor: (Suggested value .707): ")
+	Q = (float)(input("Q factor: (Suggested value .707): "))
 	W0 = 2*math.pi*(F0/FS)
 	sos = lowpass(W0, Q)
 	inputArray1 = signal.sosfilt(sos, inputArray)
