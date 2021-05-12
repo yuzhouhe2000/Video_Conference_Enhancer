@@ -1,14 +1,23 @@
 # EE434 Project Update
 
-A software that receive audio & video input and enhance them in real time. Possible application: meeting (using feedback loop in apps like Zoom) and speech/lecture recording/streaming. The software will denoise the received audio, adjust EQ and enhance the audio performance based on video infomation.
+A software that receive audio & video input and enhance them in real time. Possible application: meeting (using feedback loop in apps like Zoom) and speech/lecture recording/streaming. The software will denoise the received audio, adjust EQ and enhance the audio performance based on video infomation. In addition, it can do digital zoom or control a pan-tilt camera based on video information.
 
 Team: Michael Pozzi, Matt Baseheart, Yuzhou He
 
 ![Flask App](example.jpeg)
 
+Files:
+
+    Processor folder: contains the main software
+
+    etc folder: indivitual modules, test program, and previous versions
+
+    EE434_Report.pdf: our project report. You can find details of our implementations inside
+
+
 How it works:
     
-    [Note: 16k Hz for speech detection + single channel for speed. Can be adjusted to fit requirement, but demucs model only works at 16K Hz]
+    [Note: 16k Hz for speech detection + single channel for speed. Can be adjusted in program to fit requirement.]
 
     [Note: the server and client can be run on different or same device, but UDP from Jetson to PC is not supported]
 
@@ -85,7 +94,6 @@ Move "[denoiser.th](https://drive.google.com/file/d/17WuFlrUMJZdYiYEqvBfq4hmAd3x
     5. open flask site in chrome "http://127.0.0.1:5000/")
 
 [Note: The default IP configuration allows you to run both client and server on the same device. (127.0.0.1) You need to reconfigure the ip and port if you are running them on separate devices.]
-    
 
 Note:
 
@@ -155,7 +163,7 @@ The pipeline goes as follows:
     16. If changed significantly, adjust gain 
 
     17. Implement digital zoom 
-    
+
     18. Display image 
 
 
@@ -192,3 +200,5 @@ If there is an error that says "the selected port is already binded" or anything
     You should always open UDP receiver first, and close UDP sender first. 
     
     (which means run Server main.py file before Client flask run, and close Client window before server when quit the program.)
+
+Feel free to raise an issue and ask questions!
