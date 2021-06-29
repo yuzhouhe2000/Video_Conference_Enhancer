@@ -2,7 +2,7 @@
 
 A software that receive audio & video input and enhance them in real time. Possible application: meeting (using feedback loop in apps like Zoom) and speech/lecture recording/streaming. The software will denoise the received audio, adjust EQ and enhance the audio performance based on video infomation. In addition, it can do digital zoom or control a pan-tilt camera based on video information.
 
-This is the capstone project of EE434 at USC.
+This is a capstone project of EE434 at USC.
 
 Team: Michael Pozzi, Matt Baseheart, Yuzhou He
 
